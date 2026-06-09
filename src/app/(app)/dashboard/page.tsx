@@ -44,6 +44,12 @@ export default async function DashboardPage() {
           >
             Your spots
           </Link>
+          <Link
+            href="/spend"
+            className="text-sm font-medium underline underline-offset-4"
+          >
+            Spend
+          </Link>
           <form action={signOut}>
             <button
               type="submit"

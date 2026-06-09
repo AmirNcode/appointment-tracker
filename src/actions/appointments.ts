@@ -305,3 +305,24 @@ export async function cancelAppointment(appointmentId: string): Promise<void> {
   revalidatePath(`/appointments/${appointmentId}`);
   revalidatePath("/dashboard");
 }
+
+// T8.1 — edit the recorded amount after the fact (e.g. correct a typo on a
+// completed appointment). Empty clears it. RLS scopes the update to the owner.
+export async function updateAppointmentCost(
+  appointmentId: string,
+  formData: FormData,
+): Promise<void> {
+  const { supabase } = await requireUser();
+  const costRaw = String(formData.get("cost") ?? "").trim();
+  const cost = costRaw === "" ? null : Number(costRaw);
+  if (cost !== null && (!Number.isFinite(cost) || cost < 0)) return;
+
+  await supabase
+    .from("appointments")
+    .update({ cost })
+    .eq("id", appointmentId);
+
+  revalidatePath(`/appointments/${appointmentId}`);
+  revalidatePath("/spend");
+  revalidatePath("/dashboard");
+}

@@ -156,12 +156,12 @@
 ## Phase 8 — Spend tracking & reporting
 *Serves REQ §4.8. Goal: log spend and see totals.*
 
-- [ ] **T8.1 — Persist cost + currency** on confirm/complete · _Serves:_ REQ §4.8 · _Depends:_ T5.3
-  _Done when:_ a completed appointment stores an editable amount.
-- [ ] **T8.2 — Spend page: monthly total** · _Serves:_ REQ §4.8 · _Depends:_ T8.1
-  _Done when:_ the page shows correct total spend for a selected month.
-- [ ] **T8.3 — Per-spot / per-service breakdown** · _Serves:_ REQ §4.8 · _Depends:_ T8.2
-  _Done when:_ totals group correctly by business and by service.
+- [x] **T8.1 — Persist cost + currency** on confirm/complete · _Serves:_ REQ §4.8 · _Depends:_ T5.3
+  _Done when:_ a completed appointment stores an editable amount. ✅ Cost captured at confirm/complete (Phase 5); currency defaults to CAD. Added `updateAppointmentCost` + a Cost editor on the appointment page for completed appointments (edit/clear after the fact).
+- [x] **T8.2 — Spend page: monthly total** · _Serves:_ REQ §4.8 · _Depends:_ T8.1
+  _Done when:_ the page shows correct total spend for a selected month. ✅ `/spend` totals completed appointments with a cost, bucketed by visit date (confirmed datetime, else completion) in the user tz; prev/next month nav; linked from the dashboard.
+- [x] **T8.3 — Per-spot / per-service breakdown** · _Serves:_ REQ §4.8 · _Depends:_ T8.2
+  _Done when:_ totals group correctly by business and by service. ✅ "By business" and "By service" breakdowns for the selected month, sorted by amount.
 
 ## Phase 9 — Privacy, PWA & launch
 *Serves REQ §8, §2, §10, §12. Goal: installable, compliant, and live.*

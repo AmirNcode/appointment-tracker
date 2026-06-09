@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { confirmAppointment } from "@/actions/appointments";
+import { confirmAppointment, updateAppointmentCost } from "@/actions/appointments";
 import { HomeLink } from "@/components/home-link";
 import { AppointmentActions } from "@/components/appointments/appointment-actions";
 
@@ -256,6 +256,38 @@ export default async function AppointmentPage({
             />
           </section>
         </>
+      ) : null}
+
+      {appt.status === "completed" ? (
+        <section className="mt-8">
+          <h2 className="text-sm font-semibold">Cost</h2>
+          <p className="mt-1 text-sm text-foreground/60">
+            Correct the amount if needed — it feeds your spend totals.
+          </p>
+          <form
+            action={updateAppointmentCost.bind(null, appt.id)}
+            className="mt-3 flex items-end gap-2"
+          >
+            <label className="flex w-32 flex-col gap-1 text-xs">
+              Amount
+              <input
+                name="cost"
+                type="number"
+                min={0}
+                step="0.01"
+                defaultValue={appt.cost != null ? Number(appt.cost) : undefined}
+                placeholder="0.00"
+                className={inputCls}
+              />
+            </label>
+            <button
+              type="submit"
+              className="rounded-lg border border-foreground/20 px-3 py-2 text-sm font-medium"
+            >
+              Save
+            </button>
+          </form>
+        </section>
       ) : null}
     </main>
   );
