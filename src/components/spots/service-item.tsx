@@ -30,12 +30,16 @@ export function ServiceItem({
   return (
     <li className="rounded-lg border border-foreground/10">
       <div className="flex items-center justify-between gap-3 px-3 py-2">
-        <span>
-          <span className="font-medium">{service.name}</span>{" "}
+        <button
+          type="button"
+          onClick={() => setEditing((v) => !v)}
+          className="flex grow items-center gap-1 text-left"
+        >
+          <span className="font-medium">{service.name}</span>
           <span className="text-sm text-foreground/60">
             · {freqLabel(service.frequency_value, service.frequency_unit)}
           </span>
-        </span>
+        </button>
         <div className="flex shrink-0 items-center gap-3 text-sm">
           <button
             type="button"
