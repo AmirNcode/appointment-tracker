@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { confirmAppointment } from "@/actions/appointments";
 import { HomeLink } from "@/components/home-link";
+import { AppointmentActions } from "@/components/appointments/appointment-actions";
 
 const inputCls =
   "rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40";
@@ -65,6 +66,7 @@ export default async function AppointmentPage({
 
   const spot = appt.spot;
   const booked = appt.status === "booked";
+  const open = appt.status === "due" || appt.status === "booked";
   const bookingUrl = spot?.booking_url || spot?.website_url || null;
 
   return (
@@ -97,7 +99,16 @@ export default async function AppointmentPage({
 
       {/* Current status */}
       <div className="mt-4 text-sm font-medium text-foreground/80">
-        {booked && appt.confirmed_datetime ? (
+        {appt.status === "completed" ? (
+          <>
+            Completed
+            {appt.cost != null
+              ? ` · ${appt.currency} ${Number(appt.cost).toFixed(2)}`
+              : ""}
+          </>
+        ) : appt.status === "cancelled" ? (
+          <span className="text-foreground/50">Cancelled</span>
+        ) : booked && appt.confirmed_datetime ? (
           <>
             Booked for {formatConfirmed(appt.confirmed_datetime, tz)}
             {appt.cost != null
@@ -109,120 +120,132 @@ export default async function AppointmentPage({
         )}
       </div>
 
-      {/* T5.1 — Book now: deep link by booking method (no server call) */}
-      <section className="mt-8">
-        <h2 className="text-sm font-semibold">Book now</h2>
-        <div className="mt-3 text-sm">
-          {spot?.booking_method === "phone" ? (
-            spot.phone ? (
-              <a
-                href={`tel:${spot.phone}`}
-                className="inline-block rounded-lg bg-foreground px-4 py-2 font-medium text-background"
-              >
-                Call {spot.phone}
-              </a>
-            ) : (
-              <p className="text-foreground/60">
-                No phone number saved for this spot.
-              </p>
-            )
-          ) : spot?.booking_method === "website" ? (
-            bookingUrl ? (
-              <a
-                href={bookingUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-block rounded-lg bg-foreground px-4 py-2 font-medium text-background"
-              >
-                Open booking site
-              </a>
-            ) : (
-              <p className="text-foreground/60">
-                No booking link saved for this spot.
-              </p>
-            )
-          ) : (
-            <div className="flex flex-col gap-1 text-foreground/70">
-              {spot?.phone ? (
-                <a
-                  href={`tel:${spot.phone}`}
-                  className="underline underline-offset-4"
-                >
-                  {spot.phone}
-                </a>
-              ) : null}
-              {spot?.formatted_address ? (
-                <span>{spot.formatted_address}</span>
-              ) : null}
-              {spot?.google_maps_uri ? (
-                <a
-                  href={spot.google_maps_uri}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline underline-offset-4"
-                >
-                  Open in Maps
-                </a>
-              ) : null}
-              {!spot?.phone &&
-              !spot?.formatted_address &&
-              !spot?.google_maps_uri ? (
-                <span className="text-foreground/60">
-                  No booking details saved.
-                </span>
-              ) : null}
+      {open ? (
+        <>
+          {/* T5.1 — Book now: deep link by booking method (no server call) */}
+          <section className="mt-8">
+            <h2 className="text-sm font-semibold">Book now</h2>
+            <div className="mt-3 text-sm">
+              {spot?.booking_method === "phone" ? (
+                spot.phone ? (
+                  <a
+                    href={`tel:${spot.phone}`}
+                    className="inline-block rounded-lg bg-foreground px-4 py-2 font-medium text-background"
+                  >
+                    Call {spot.phone}
+                  </a>
+                ) : (
+                  <p className="text-foreground/60">
+                    No phone number saved for this spot.
+                  </p>
+                )
+              ) : spot?.booking_method === "website" ? (
+                bookingUrl ? (
+                  <a
+                    href={bookingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-block rounded-lg bg-foreground px-4 py-2 font-medium text-background"
+                  >
+                    Open booking site
+                  </a>
+                ) : (
+                  <p className="text-foreground/60">
+                    No booking link saved for this spot.
+                  </p>
+                )
+              ) : (
+                <div className="flex flex-col gap-1 text-foreground/70">
+                  {spot?.phone ? (
+                    <a
+                      href={`tel:${spot.phone}`}
+                      className="underline underline-offset-4"
+                    >
+                      {spot.phone}
+                    </a>
+                  ) : null}
+                  {spot?.formatted_address ? (
+                    <span>{spot.formatted_address}</span>
+                  ) : null}
+                  {spot?.google_maps_uri ? (
+                    <a
+                      href={spot.google_maps_uri}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline underline-offset-4"
+                    >
+                      Open in Maps
+                    </a>
+                  ) : null}
+                  {!spot?.phone &&
+                  !spot?.formatted_address &&
+                  !spot?.google_maps_uri ? (
+                    <span className="text-foreground/60">
+                      No booking details saved.
+                    </span>
+                  ) : null}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </section>
+          </section>
 
-      {/* T5.2 — Confirm the booking */}
-      <section className="mt-8">
-        <h2 className="text-sm font-semibold">
-          {booked ? "Update booking" : "Confirm your booking"}
-        </h2>
-        <p className="mt-1 text-sm text-foreground/60">
-          Booked it? Enter the date &amp; time so we can remind you (and, later,
-          add it to your calendar).
-        </p>
-        <form
-          action={confirmAppointment.bind(null, appt.id)}
-          className="mt-3 flex flex-wrap items-end gap-2"
-        >
-          <label className="flex flex-col gap-1 text-xs">
-            Date &amp; time
-            <input
-              name="confirmedAt"
-              type="datetime-local"
-              required
-              defaultValue={
-                booked && appt.confirmed_datetime
-                  ? toLocalInputValue(appt.confirmed_datetime, tz)
-                  : undefined
-              }
-              className={inputCls}
+          {/* T5.2 — Confirm the booking */}
+          <section className="mt-8">
+            <h2 className="text-sm font-semibold">
+              {booked ? "Update booking" : "Confirm your booking"}
+            </h2>
+            <p className="mt-1 text-sm text-foreground/60">
+              Booked it? Enter the date &amp; time so we can remind you (and,
+              later, add it to your calendar).
+            </p>
+            <form
+              action={confirmAppointment.bind(null, appt.id)}
+              className="mt-3 flex flex-wrap items-end gap-2"
+            >
+              <label className="flex flex-col gap-1 text-xs">
+                Date &amp; time
+                <input
+                  name="confirmedAt"
+                  type="datetime-local"
+                  required
+                  defaultValue={
+                    booked && appt.confirmed_datetime
+                      ? toLocalInputValue(appt.confirmed_datetime, tz)
+                      : undefined
+                  }
+                  className={inputCls}
+                />
+              </label>
+              <label className="flex w-28 flex-col gap-1 text-xs">
+                Cost (optional)
+                <input
+                  name="cost"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  defaultValue={appt.cost != null ? Number(appt.cost) : undefined}
+                  placeholder="0.00"
+                  className={inputCls}
+                />
+              </label>
+              <button
+                type="submit"
+                className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background"
+              >
+                {booked ? "Update" : "Confirm booking"}
+              </button>
+            </form>
+          </section>
+
+          {/* T5.3 + T5.4 — complete (roll forward) / cancel */}
+          <section className="mt-8 border-t border-foreground/10 pt-6">
+            <AppointmentActions
+              id={appt.id}
+              defaultCost={appt.cost != null ? Number(appt.cost) : null}
             />
-          </label>
-          <label className="flex w-28 flex-col gap-1 text-xs">
-            Cost (optional)
-            <input
-              name="cost"
-              type="number"
-              min={0}
-              step="0.01"
-              defaultValue={appt.cost != null ? Number(appt.cost) : undefined}
-              placeholder="0.00"
-              className={inputCls}
-            />
-          </label>
-          <button
-            type="submit"
-            className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background"
-          >
-            {booked ? "Update" : "Confirm booking"}
-          </button>
-        </form>
-      </section>
+          </section>
+        </>
+      ) : null}
     </main>
   );
 }

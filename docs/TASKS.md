@@ -118,10 +118,10 @@
   _Done when:_ each booking method routes correctly (phone dials, website opens, other shows details). ✅ On `/appointments/[id]`: `phone`→`tel:`, `website`→booking_url/website (new tab), `other`→contact details (phone/address/Maps). Dashboard items now link here.
 - [x] **T5.2 — `confirmAppointment` action** (status=`booked`, `confirmed_datetime`, optional cost) + `pre_appointment` reminder · _Serves:_ REQ §4.5, §4.7 · _Depends:_ T4.4, T2.5
   _Done when:_ confirming sets the datetime and creates a pre-appointment reminder. ✅ `src/actions/appointments.ts`: due→booked, wall-clock interpreted in user tz via `zonedDateTimeToUTC`, optional cost; replaces unsent reminders with a `pre_appointment` at `confirmed − 7d` (`preAppointmentSendAt`). Both helpers unit-tested (26/26).
-- [ ] **T5.3 — `completeAppointment` action** (status=`completed`, cost) + roll forward next cycle · _Serves:_ REQ §4.5, §4.4 · _Depends:_ T5.2, T4.1
-  _Done when:_ completing one appointment auto-creates the next `due` appointment + its `due_soon` reminder.
-- [ ] **T5.4 — `cancelAppointment` action** · _Serves:_ REQ §4.5 · _Depends:_ T5.2
-  _Done when:_ cancelling sets status `cancelled` and removes its pending reminders.
+- [x] **T5.3 — `completeAppointment` action** (status=`completed`, cost) + roll forward next cycle · _Serves:_ REQ §4.5, §4.4 · _Depends:_ T5.2, T4.1
+  _Done when:_ completing one appointment auto-creates the next `due` appointment + its `due_soon` reminder. ✅ `completeAppointment` in `src/actions/appointments.ts`: closes the cycle then seeds the next `due` (next due = visit date [confirmed datetime if booked, else today] + frequency) with a `due_soon` reminder at due−7d; optional cost. Triggered from `AppointmentActions` on `/appointments/[id]`.
+- [x] **T5.4 — `cancelAppointment` action** · _Serves:_ REQ §4.5 · _Depends:_ T5.2
+  _Done when:_ cancelling sets status `cancelled` and removes its pending reminders. ✅ `cancelAppointment` sets status `cancelled` and deletes unsent reminders; terminal per DESIGN §4.6 (no roll-forward). Cancel button (with confirm) in `AppointmentActions`.
 
 ## Phase 6 — Email reminders
 *Serves REQ §4.7, §8 (CASL). Goal: opted-in users get reminders; unsubscribe works.*
