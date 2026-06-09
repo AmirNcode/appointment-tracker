@@ -35,6 +35,7 @@ export function AddSpot() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [manual, setManual] = useState(false);
   const sessionRef = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
@@ -83,6 +84,7 @@ export function AddSpot() {
 
   function reset() {
     setSelected(null);
+    setManual(false);
     setQuery("");
     setSuggestions([]);
     setServices([{ ...emptyService }]);
@@ -92,12 +94,41 @@ export function AddSpot() {
     sessionRef.current = crypto.randomUUID();
   }
 
+  // Start a manual entry for a place that isn't on Google Maps. Reuses the
+  // configure/save step, but with editable place fields instead of read-only.
+  function startManual() {
+    setSelected({
+      googlePlaceId: null,
+      name: query.trim(),
+      formattedAddress: null,
+      latitude: null,
+      longitude: null,
+      phone: null,
+      websiteUrl: null,
+      googleMapsUri: null,
+      openingHours: null,
+    });
+    setManual(true);
+    setSuggestions([]);
+    setBookingMethod("phone");
+    setBookingUrl("");
+    setError(null);
+  }
+
+  function patchSelected(patch: Partial<PlaceDetails>) {
+    setSelected((s) => (s ? { ...s, ...patch } : s));
+  }
+
   function updateService(i: number, patch: Partial<ServiceRow>) {
     setServices((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   }
 
   async function save() {
     if (!selected) return;
+    if (!selected.name.trim()) {
+      setError("Enter a business name.");
+      return;
+    }
     setSaving(true);
     setError(null);
     const result = await createSpot({
@@ -156,6 +187,13 @@ export function AddSpot() {
         {query.trim().length > 0 && query.trim().length < 3 ? (
           <p className="mt-2 text-xs text-foreground/40">Keep typing…</p>
         ) : null}
+        <button
+          type="button"
+          onClick={startManual}
+          className="mt-4 text-sm font-medium text-foreground underline underline-offset-4"
+        >
+          Can&apos;t find it? Add a place manually
+        </button>
       </div>
     );
   }
@@ -164,28 +202,92 @@ export function AddSpot() {
   return (
     <div className="mt-6 flex flex-col gap-6">
       <div className="rounded-lg border border-foreground/15 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="font-medium">{selected.name}</div>
-            {selected.formattedAddress ? (
-              <div className="mt-0.5 text-sm text-foreground/60">
-                {selected.formattedAddress}
-              </div>
-            ) : null}
-            {selected.phone ? (
-              <div className="mt-0.5 text-sm text-foreground/60">
-                {selected.phone}
-              </div>
-            ) : null}
+        {manual ? (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold">Add a place manually</h2>
+              <button
+                type="button"
+                onClick={reset}
+                className="shrink-0 text-sm text-foreground/60 underline underline-offset-4"
+              >
+                Cancel
+              </button>
+            </div>
+            <label className="flex flex-col gap-1 text-xs">
+              Business name
+              <input
+                type="text"
+                autoFocus
+                value={selected.name}
+                onChange={(e) => patchSelected({ name: e.target.value })}
+                placeholder="e.g. Jane's home studio"
+                className={inputCls}
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              Address (optional)
+              <input
+                type="text"
+                value={selected.formattedAddress ?? ""}
+                onChange={(e) =>
+                  patchSelected({ formattedAddress: e.target.value || null })
+                }
+                placeholder="Street, city"
+                className={inputCls}
+              />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <label className="flex grow flex-col gap-1 text-xs">
+                Phone (optional)
+                <input
+                  type="tel"
+                  value={selected.phone ?? ""}
+                  onChange={(e) =>
+                    patchSelected({ phone: e.target.value || null })
+                  }
+                  placeholder="(555) 123-4567"
+                  className={inputCls}
+                />
+              </label>
+              <label className="flex grow flex-col gap-1 text-xs">
+                Website (optional)
+                <input
+                  type="url"
+                  value={selected.websiteUrl ?? ""}
+                  onChange={(e) =>
+                    patchSelected({ websiteUrl: e.target.value || null })
+                  }
+                  placeholder="https://…"
+                  className={inputCls}
+                />
+              </label>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={reset}
-            className="shrink-0 text-sm text-foreground/60 underline underline-offset-4"
-          >
-            Change
-          </button>
-        </div>
+        ) : (
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="font-medium">{selected.name}</div>
+              {selected.formattedAddress ? (
+                <div className="mt-0.5 text-sm text-foreground/60">
+                  {selected.formattedAddress}
+                </div>
+              ) : null}
+              {selected.phone ? (
+                <div className="mt-0.5 text-sm text-foreground/60">
+                  {selected.phone}
+                </div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={reset}
+              className="shrink-0 text-sm text-foreground/60 underline underline-offset-4"
+            >
+              Change
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Services */}
@@ -304,7 +406,7 @@ export function AddSpot() {
         <button
           type="button"
           onClick={save}
-          disabled={saving}
+          disabled={saving || !selected.name.trim()}
           className="rounded-lg bg-foreground px-5 py-2.5 text-sm font-medium text-background disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save spot"}

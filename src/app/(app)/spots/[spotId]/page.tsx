@@ -1,21 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import {
-  addService,
-  deleteService,
-  deleteSpot,
-  updateBooking,
-  updateService,
-} from "@/actions/spots";
+import { addService, deleteSpot, updateBooking } from "@/actions/spots";
 import { HomeLink } from "@/components/home-link";
+import { ServiceItem } from "@/components/spots/service-item";
 
 const inputCls =
   "rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40";
-
-function freqLabel(value: number, unit: string) {
-  return `every ${value} ${unit}${value === 1 ? "" : "s"}`;
-}
 
 export default async function SpotDetailPage({
   params,
@@ -94,78 +85,7 @@ export default async function SpotDetailPage({
         {services && services.length > 0 ? (
           <ul className="mt-3 flex flex-col gap-2">
             {services.map((svc) => (
-              <li key={svc.id} className="rounded-lg border border-foreground/10">
-                <details>
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2">
-                    <span>
-                      <span className="font-medium">{svc.name}</span>{" "}
-                      <span className="text-sm text-foreground/60">
-                        · {freqLabel(svc.frequency_value, svc.frequency_unit)}
-                      </span>
-                    </span>
-                    <span className="text-sm text-foreground/50 underline underline-offset-4">
-                      Edit
-                    </span>
-                  </summary>
-                  <div className="border-t border-foreground/10 p-3">
-                    <form
-                      action={updateService.bind(null, svc.id, spot.id)}
-                      className="flex flex-wrap items-end gap-2"
-                    >
-                      <label className="flex grow flex-col gap-1 text-xs">
-                        Service
-                        <input
-                          name="name"
-                          type="text"
-                          required
-                          defaultValue={svc.name}
-                          className={inputCls}
-                        />
-                      </label>
-                      <label className="flex w-16 flex-col gap-1 text-xs">
-                        Every
-                        <input
-                          name="frequencyValue"
-                          type="number"
-                          min={1}
-                          required
-                          defaultValue={svc.frequency_value}
-                          className={inputCls}
-                        />
-                      </label>
-                      <label className="flex w-24 flex-col gap-1 text-xs">
-                        Unit
-                        <select
-                          name="frequencyUnit"
-                          defaultValue={svc.frequency_unit}
-                          className={inputCls}
-                        >
-                          <option value="day">days</option>
-                          <option value="week">weeks</option>
-                          <option value="month">months</option>
-                        </select>
-                      </label>
-                      <button
-                        type="submit"
-                        className="rounded-lg bg-foreground px-3 py-2 text-sm font-medium text-background"
-                      >
-                        Save
-                      </button>
-                    </form>
-                    <form
-                      action={deleteService.bind(null, svc.id, spot.id)}
-                      className="mt-3"
-                    >
-                      <button
-                        type="submit"
-                        className="text-sm text-red-600 underline underline-offset-4"
-                      >
-                        Remove this service
-                      </button>
-                    </form>
-                  </div>
-                </details>
-              </li>
+              <ServiceItem key={svc.id} service={svc} spotId={spot.id} />
             ))}
           </ul>
         ) : (

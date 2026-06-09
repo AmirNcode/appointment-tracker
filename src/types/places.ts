@@ -10,7 +10,7 @@ export type PlaceSuggestion = {
 };
 
 export type PlaceDetails = {
-  googlePlaceId: string;
+  googlePlaceId: string | null; // null for a manually-added place (not on Google)
   name: string;
   formattedAddress: string | null;
   latitude: number | null;

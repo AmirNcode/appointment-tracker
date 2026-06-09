@@ -93,8 +93,8 @@ export async function createSpot(
   if (!user) return { error: "You must be signed in." };
 
   const { place, bookingMethod, bookingUrl, services } = input;
-  if (!place?.googlePlaceId || !place.name) {
-    return { error: "Pick a business first." };
+  if (!place?.name?.trim()) {
+    return { error: "Enter a business name." };
   }
   const clean = services.filter(
     (s) => s.name.trim() && Number.isInteger(s.frequencyValue) && s.frequencyValue > 0,
@@ -109,8 +109,8 @@ export async function createSpot(
     .from("spots")
     .insert({
       user_id: user.id,
-      google_place_id: place.googlePlaceId,
-      name: place.name,
+      google_place_id: place.googlePlaceId || null,
+      name: place.name.trim(),
       formatted_address: place.formattedAddress,
       latitude: place.latitude,
       longitude: place.longitude,
@@ -230,8 +230,12 @@ export async function addService(
   revalidatePath("/dashboard");
 }
 
-// Edit a service's name + frequency. The existing open appointment keeps its
-// due date; the new frequency applies to the next cycle (after completion).
+// Edit a service's name, frequency, and last-visit (anchor) date. If a
+// last-visit date is provided, recompute the open `due` appointment's due date
+// (anchor + frequency) and shift its unsent reminder to match — this is how a
+// forgotten "last visit" gets corrected without deleting the service. Clearing
+// the date leaves the existing due date untouched (no unambiguous reference to
+// recompute from), and a `booked` appointment is never overridden.
 export async function updateService(
   serviceId: string,
   spotId: string,
@@ -243,6 +247,7 @@ export async function updateService(
   const frequencyUnit = String(
     formData.get("frequencyUnit") ?? "week",
   ) as FrequencyUnit;
+  const anchor = String(formData.get("anchorDate") ?? "").trim() || null;
   if (!name || !Number.isInteger(frequencyValue) || frequencyValue <= 0) return;
 
   await supabase
@@ -251,8 +256,32 @@ export async function updateService(
       name,
       frequency_value: frequencyValue,
       frequency_unit: frequencyUnit,
+      anchor_date: anchor,
     })
     .eq("id", serviceId);
+
+  if (anchor) {
+    const newDue = nextDueDate(anchor, frequencyValue, frequencyUnit);
+    const { data: appt } = await supabase
+      .from("appointments")
+      .select("id")
+      .eq("service_id", serviceId)
+      .eq("status", "due")
+      .maybeSingle();
+    if (appt) {
+      await supabase
+        .from("appointments")
+        .update({ due_date: newDue })
+        .eq("id", appt.id);
+      await supabase
+        .from("reminders")
+        .update({ send_at: reminderSendAt(newDue) })
+        .eq("appointment_id", appt.id)
+        .eq("type", "due_soon")
+        .eq("sent", false);
+    }
+  }
+
   revalidatePath(`/spots/${spotId}`);
   revalidatePath("/dashboard");
 }
