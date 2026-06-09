@@ -142,16 +142,16 @@
 ## Phase 7 — Calendar export (.ics)  🎯 *DoD loop closes here*
 *Serves REQ §4.6. Goal: confirmed appointments export to any calendar via .ics.*
 
-- [ ] **T7.1 — `lib/calendar/ics.ts` builds `VEVENT`** (UID=appt id, DTSTART/END, SUMMARY, LOCATION, optional VALARM) + snapshot tests · _Serves:_ REQ §4.6 · _Depends:_ T2.4
-  _Done when:_ generated `.ics` validates and snapshot tests pass.
-- [ ] **T7.2 — `/api/appointments/[id]/ics` download route** (`text/calendar`) · _Serves:_ REQ §4.6 · _Depends:_ T7.1, T5.2
-  _Done when:_ the downloaded file imports as a correct event in Google **and** Apple **and** Outlook.
-- [ ] **T7.3 — Booking-confirmation email with `.ics` attached** on confirm · _Serves:_ REQ §4.6 · _Depends:_ T7.1, T6.1, T5.2
-  _Done when:_ confirming sends the email; Gmail/Apple Mail show a one-tap "Add to calendar".
-- [ ] **T7.4 — Edit/cancel re-issues `.ics`** (bump `ics_sequence`; `METHOD:CANCEL` on cancel) · _Serves:_ REQ §4.6 · _Depends:_ T7.2, T5.4
-  _Done when:_ re-importing an updated file changes the existing event (best-effort, verified in one client).
-- [ ] **T7.5 — "Add to calendar" button** on the appointment page · _Serves:_ REQ §4.6 · _Depends:_ T7.2
-  _Done when:_ the button downloads/opens the `.ics` from within the app.
+- [x] **T7.1 — `lib/calendar/ics.ts` builds `VEVENT`** (UID=appt id, DTSTART/END, SUMMARY, LOCATION, optional VALARM) + snapshot tests · _Serves:_ REQ §4.6 · _Depends:_ T2.4
+  _Done when:_ generated `.ics` validates and snapshot tests pass. ✅ `buildICS` + `buildAppointmentICS` (RFC 5545: VCALENDAR/VEVENT, UTC stamps, TEXT escaping, 75-octet folding, CRLF, 1-day VALARM, CANCEL variant). 8 unit tests (34/34 total). _Note:_ `METHOD:PUBLISH` (not `REQUEST`) for adds/edits — valid without ORGANIZER/ATTENDEE and broadest "add to my calendar" compatibility.
+- [x] **T7.2 — `/api/appointments/[id]/ics` download route** (`text/calendar`) · _Serves:_ REQ §4.6 · _Depends:_ T7.1, T5.2
+  _Done when:_ the downloaded file imports as a correct event in Google **and** Apple **and** Outlook. ✅ Auth+RLS-gated route returns `text/calendar` + `Content-Disposition: attachment` for a confirmed appointment (404 if not booked). ⏳ Cross-client import to be spot-checked by the user.
+- [x] **T7.3 — Booking-confirmation email with `.ics` attached** on confirm · _Serves:_ REQ §4.6 · _Depends:_ T7.1, T6.1, T5.2
+  _Done when:_ confirming sends the email; Gmail/Apple Mail show a one-tap "Add to calendar". ✅ `confirmAppointment` sends `BookingConfirmationEmail` with the `.ics` attached (best-effort). ⏳ Inline "Add to calendar" rendering to be confirmed in Gmail/Apple Mail.
+- [x] **T7.4 — Edit/cancel re-issues `.ics`** (bump `ics_sequence`; `METHOD:CANCEL` on cancel) · _Serves:_ REQ §4.6 · _Depends:_ T7.2, T5.4
+  _Done when:_ re-importing an updated file changes the existing event (best-effort, verified in one client). ✅ Re-confirm bumps `ics_sequence` (same UID); cancel bumps it, emits `METHOD:CANCEL`/`STATUS:CANCELLED`, and emails a cancellation `.ics`. ⏳ Update/remove behavior to be spot-checked in one client.
+- [x] **T7.5 — "Add to calendar" button** on the appointment page · _Serves:_ REQ §4.6 · _Depends:_ T7.2
+  _Done when:_ the button downloads/opens the `.ics` from within the app. ✅ Button on `/appointments/[id]` (shown when booked) links to the `.ics` route.
 
 ## Phase 8 — Spend tracking & reporting
 *Serves REQ §4.8. Goal: log spend and see totals.*

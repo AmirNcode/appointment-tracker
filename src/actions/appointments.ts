@@ -10,6 +10,9 @@ import {
   todayInTimeZone,
   zonedDateTimeToUTC,
 } from "@/lib/domain/scheduling";
+import { buildAppointmentICS } from "@/lib/calendar/ics";
+import { sendEmail } from "@/lib/email/send";
+import { BookingConfirmationEmail } from "@/emails/booking-confirmation";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -44,6 +47,19 @@ function localDate(utcISO: string, tz: string): string {
   }).format(new Date(utcISO));
 }
 
+/** Human-readable date + time of a UTC instant in the given timezone. */
+function formatDateTime(utcISO: string, tz: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(utcISO));
+}
+
 // T5.2 — confirm a real booking: due -> booked, store the confirmed datetime
 // (the wall-clock time is interpreted in the user's timezone) plus an optional
 // cost, then schedule a pre-appointment reminder. "Book now" (T5.1) is a pure
@@ -63,19 +79,26 @@ export async function confirmAppointment(
   // Only an owner's open appointment can be confirmed (RLS also enforces this).
   const { data: appt } = await supabase
     .from("appointments")
-    .select("id, status")
+    .select(
+      "id, status, ics_sequence, duration_minutes, service:services(name), spot:spots(name, formatted_address, phone, booking_url, website_url)",
+    )
     .eq("id", appointmentId)
     .maybeSingle();
   if (!appt || (appt.status !== "due" && appt.status !== "booked")) return;
 
   const tz = await userTimezone(supabase, user.id);
   const confirmedUTC = zonedDateTimeToUTC(wallClock, tz);
+  // First confirm publishes SEQUENCE 0; editing an already-booked appointment
+  // bumps it so a re-issued .ics updates the existing calendar event (T7.4).
+  const sequence =
+    appt.status === "booked" ? appt.ics_sequence + 1 : appt.ics_sequence;
 
   const { error } = await supabase
     .from("appointments")
     .update({
       status: "booked",
       confirmed_datetime: confirmedUTC,
+      ics_sequence: sequence,
       ...(cost !== null ? { cost } : {}),
     })
     .eq("id", appointmentId);
@@ -95,6 +118,43 @@ export async function confirmAppointment(
     channel: "email",
     send_at: preAppointmentSendAt(confirmedUTC),
   });
+
+  // T7.3 — booking-confirmation email with the .ics attached (best-effort).
+  if (user.email) {
+    try {
+      const base = process.env.APP_URL ?? "http://localhost:3000";
+      const serviceName = appt.service?.name ?? "your appointment";
+      const spotName = appt.spot?.name ?? "your spot";
+      const ics = buildAppointmentICS({
+        appointmentId,
+        startUTC: confirmedUTC,
+        durationMinutes: appt.duration_minutes,
+        serviceName,
+        spotName,
+        location: appt.spot?.formatted_address,
+        phone: appt.spot?.phone,
+        bookingUrl: appt.spot?.booking_url ?? appt.spot?.website_url,
+        appUrl: `${base}/appointments/${appointmentId}`,
+        sequence,
+      });
+      await sendEmail({
+        to: user.email,
+        subject: `Booked: ${serviceName} at ${spotName}`,
+        react: BookingConfirmationEmail({
+          serviceName,
+          spotName,
+          whenText: formatDateTime(confirmedUTC, tz),
+          viewUrl: `${base}/appointments/${appointmentId}`,
+        }),
+        tag: "booking_confirmation",
+        attachments: [
+          { filename: "appointment.ics", content: Buffer.from(ics) },
+        ],
+      });
+    } catch {
+      // ignore — confirmation email is best-effort
+    }
+  }
 
   revalidatePath(`/appointments/${appointmentId}`);
   revalidatePath("/dashboard");
@@ -181,24 +241,66 @@ export async function completeAppointment(
 // reminders. It does NOT roll the cycle forward (per the DESIGN §4.6 state
 // machine); the service has no open appointment afterwards.
 export async function cancelAppointment(appointmentId: string): Promise<void> {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
   const { data: appt } = await supabase
     .from("appointments")
-    .select("id, status")
+    .select(
+      "id, status, confirmed_datetime, ics_sequence, duration_minutes, service:services(name), spot:spots(name, formatted_address)",
+    )
     .eq("id", appointmentId)
     .maybeSingle();
   if (!appt || (appt.status !== "due" && appt.status !== "booked")) return;
 
+  const sequence = appt.ics_sequence + 1;
   await supabase
     .from("appointments")
-    .update({ status: "cancelled" })
+    .update({ status: "cancelled", ics_sequence: sequence })
     .eq("id", appointmentId);
   await supabase
     .from("reminders")
     .delete()
     .eq("appointment_id", appointmentId)
     .eq("sent", false);
+
+  // T7.4 — if it was a real booking, email a CANCEL .ics so the user's calendar
+  // can drop the event (best-effort).
+  if (appt.confirmed_datetime && user.email) {
+    try {
+      const tz = await userTimezone(supabase, user.id);
+      const base = process.env.APP_URL ?? "http://localhost:3000";
+      const serviceName = appt.service?.name ?? "your appointment";
+      const spotName = appt.spot?.name ?? "your spot";
+      const ics = buildAppointmentICS({
+        appointmentId,
+        startUTC: appt.confirmed_datetime,
+        durationMinutes: appt.duration_minutes,
+        serviceName,
+        spotName,
+        location: appt.spot?.formatted_address,
+        appUrl: `${base}/appointments/${appointmentId}`,
+        sequence,
+        cancelled: true,
+      });
+      await sendEmail({
+        to: user.email,
+        subject: `Cancelled: ${serviceName} at ${spotName}`,
+        react: BookingConfirmationEmail({
+          serviceName,
+          spotName,
+          whenText: formatDateTime(appt.confirmed_datetime, tz),
+          viewUrl: `${base}/appointments/${appointmentId}`,
+          cancelled: true,
+        }),
+        tag: "booking_cancellation",
+        attachments: [
+          { filename: "appointment.ics", content: Buffer.from(ics) },
+        ],
+      });
+    } catch {
+      // ignore — cancellation email is best-effort
+    }
+  }
 
   revalidatePath(`/appointments/${appointmentId}`);
   revalidatePath("/dashboard");

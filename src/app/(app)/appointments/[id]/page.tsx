@@ -120,6 +120,17 @@ export default async function AppointmentPage({
         )}
       </div>
 
+      {booked ? (
+        <div className="mt-3">
+          <a
+            href={`/api/appointments/${appt.id}/ics`}
+            className="inline-block rounded-lg border border-foreground/20 px-3 py-1.5 text-sm font-medium"
+          >
+            Add to calendar
+          </a>
+        </div>
+      ) : null}
+
       {open ? (
         <>
           {/* T5.1 — Book now: deep link by booking method (no server call) */}
