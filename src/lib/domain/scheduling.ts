@@ -96,3 +96,40 @@ export function todayInTimeZone(timeZone: string): string {
     day: "2-digit",
   }).format(new Date());
 }
+
+/**
+ * Convert a timezone-naive wall-clock datetime (e.g. "2026-07-15T14:30" from an
+ * `<input type="datetime-local">`), interpreted in `timeZone`, to a UTC ISO
+ * instant for a `timestamptz` column. The zone offset is sampled at the given
+ * instant, so a value inside a DST transition hour can be off by 1h — an
+ * acceptable edge for v1 appointment times.
+ */
+export function zonedDateTimeToUTC(wallClock: string, timeZone: string): string {
+  const asIfUTC = new Date(`${wallClock}Z`);
+  if (Number.isNaN(asIfUTC.getTime())) {
+    throw new Error(
+      `Invalid datetime, expected "YYYY-MM-DDTHH:mm": ${wallClock}`,
+    );
+  }
+  // The same instant rendered as wall-clock in `timeZone` vs UTC differs by the
+  // zone's offset; the runtime's own tz cancels across the two renderings.
+  const tzWall = new Date(asIfUTC.toLocaleString("en-US", { timeZone }));
+  const utcWall = new Date(asIfUTC.toLocaleString("en-US", { timeZone: "UTC" }));
+  const offsetMs = tzWall.getTime() - utcWall.getTime();
+  return new Date(asIfUTC.getTime() - offsetMs).toISOString();
+}
+
+/**
+ * When to send the "pre-appointment" reminder: `leadDays` before a confirmed
+ * appointment instant. Returns an ISO timestamp. See DESIGN §3.2.
+ */
+export function preAppointmentSendAt(
+  confirmedUTCISO: string,
+  leadDays = 7,
+): string {
+  const t = new Date(confirmedUTCISO);
+  if (Number.isNaN(t.getTime())) {
+    throw new Error(`Invalid datetime: ${confirmedUTCISO}`);
+  }
+  return new Date(t.getTime() - leadDays * 24 * 60 * 60 * 1000).toISOString();
+}

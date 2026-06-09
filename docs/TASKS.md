@@ -114,10 +114,10 @@
 ## Phase 5 — Assisted booking + confirm/complete
 *Serves REQ §4.5. Goal: deep-link to booking, confirm, and roll the cycle forward.*
 
-- [ ] **T5.1 — "Book now" deep-link** (tel: / open URL / show details by booking method) · _Serves:_ REQ §4.5 · _Depends:_ T4.4, T3.5
-  _Done when:_ each booking method routes correctly (phone dials, website opens, other shows details).
-- [ ] **T5.2 — `confirmAppointment` action** (status=`booked`, `confirmed_datetime`, optional cost) + `pre_appointment` reminder · _Serves:_ REQ §4.5, §4.7 · _Depends:_ T4.4, T2.5
-  _Done when:_ confirming sets the datetime and creates a pre-appointment reminder.
+- [x] **T5.1 — "Book now" deep-link** (tel: / open URL / show details by booking method) · _Serves:_ REQ §4.5 · _Depends:_ T4.4, T3.5
+  _Done when:_ each booking method routes correctly (phone dials, website opens, other shows details). ✅ On `/appointments/[id]`: `phone`→`tel:`, `website`→booking_url/website (new tab), `other`→contact details (phone/address/Maps). Dashboard items now link here.
+- [x] **T5.2 — `confirmAppointment` action** (status=`booked`, `confirmed_datetime`, optional cost) + `pre_appointment` reminder · _Serves:_ REQ §4.5, §4.7 · _Depends:_ T4.4, T2.5
+  _Done when:_ confirming sets the datetime and creates a pre-appointment reminder. ✅ `src/actions/appointments.ts`: due→booked, wall-clock interpreted in user tz via `zonedDateTimeToUTC`, optional cost; replaces unsent reminders with a `pre_appointment` at `confirmed − 7d` (`preAppointmentSendAt`). Both helpers unit-tested (26/26).
 - [ ] **T5.3 — `completeAppointment` action** (status=`completed`, cost) + roll forward next cycle · _Serves:_ REQ §4.5, §4.4 · _Depends:_ T5.2, T4.1
   _Done when:_ completing one appointment auto-creates the next `due` appointment + its `due_soon` reminder.
 - [ ] **T5.4 — `cancelAppointment` action** · _Serves:_ REQ §4.5 · _Depends:_ T5.2

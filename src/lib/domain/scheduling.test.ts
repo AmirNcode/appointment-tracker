@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { addInterval, nextDueDate, reminderSendAt } from "./scheduling";
+import {
+  addInterval,
+  nextDueDate,
+  preAppointmentSendAt,
+  reminderSendAt,
+  zonedDateTimeToUTC,
+} from "./scheduling";
 
 describe("addInterval — day", () => {
   it("adds a single day", () => {
@@ -81,5 +87,41 @@ describe("reminderSendAt", () => {
   });
   it("handles month/year boundaries", () => {
     expect(reminderSendAt("2027-01-03")).toBe("2026-12-27T13:00:00.000Z");
+  });
+});
+
+describe("zonedDateTimeToUTC", () => {
+  it("converts an EDT (summer) wall time to UTC", () => {
+    // Toronto is UTC-4 in July → 14:30 local = 18:30 UTC.
+    expect(zonedDateTimeToUTC("2026-07-15T14:30", "America/Toronto")).toBe(
+      "2026-07-15T18:30:00.000Z",
+    );
+  });
+  it("converts an EST (winter) wall time to UTC", () => {
+    // Toronto is UTC-5 in January → 09:00 local = 14:00 UTC.
+    expect(zonedDateTimeToUTC("2026-01-15T09:00", "America/Toronto")).toBe(
+      "2026-01-15T14:00:00.000Z",
+    );
+  });
+  it("is the identity for UTC", () => {
+    expect(zonedDateTimeToUTC("2026-07-15T14:30", "UTC")).toBe(
+      "2026-07-15T14:30:00.000Z",
+    );
+  });
+  it("rejects a malformed datetime", () => {
+    expect(() => zonedDateTimeToUTC("nope", "UTC")).toThrow();
+  });
+});
+
+describe("preAppointmentSendAt", () => {
+  it("defaults to 7 days before the confirmed instant", () => {
+    expect(preAppointmentSendAt("2026-07-15T18:30:00.000Z")).toBe(
+      "2026-07-08T18:30:00.000Z",
+    );
+  });
+  it("respects a custom lead time", () => {
+    expect(preAppointmentSendAt("2026-07-15T18:30:00.000Z", 1)).toBe(
+      "2026-07-14T18:30:00.000Z",
+    );
   });
 });

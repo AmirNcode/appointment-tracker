@@ -75,7 +75,7 @@ export default async function DashboardPage() {
             return (
               <li key={it.id}>
                 <Link
-                  href={`/spots/${it.spot_id}`}
+                  href={`/appointments/${it.id}`}
                   className="flex items-center justify-between gap-3 rounded-lg border border-foreground/10 px-4 py-3 hover:border-foreground/30"
                 >
                   <div>
