@@ -53,6 +53,18 @@ export default function SignupPage() {
               </span>
             </label>
 
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="emailReminders"
+                className="mt-0.5 h-4 w-4"
+              />
+              <span className="text-foreground/70">
+                Email me reminders when an appointment is due. You can
+                unsubscribe anytime.
+              </span>
+            </label>
+
             {state.error ? (
               <p className="text-sm text-red-600" role="alert">
                 {state.error}
