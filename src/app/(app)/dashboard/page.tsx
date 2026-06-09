@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/actions/auth";
 import { todayInTimeZone } from "@/lib/domain/scheduling";
+import { HomeLink } from "@/components/home-link";
 
 function freqLabel(value: number, unit: string) {
   return `every ${value} ${unit}${value === 1 ? "" : "s"}`;
@@ -24,7 +25,7 @@ export default async function DashboardPage() {
   const { data: items } = await supabase
     .from("appointments")
     .select(
-      "id, due_date, status, service:services(name, frequency_value, frequency_unit), spot:spots(name)",
+      "id, due_date, status, spot_id, service:services(name, frequency_value, frequency_unit), spot:spots(name)",
     )
     .in("status", ["due", "booked"])
     .order("due_date", { ascending: true });
@@ -32,7 +33,10 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
       <header className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <div className="flex items-center gap-3">
+          <HomeLink />
+          <h1 className="text-2xl font-semibold">Dashboard</h1>
+        </div>
         <div className="flex items-center gap-4">
           <Link
             href="/spots"
@@ -69,39 +73,41 @@ export default async function DashboardPage() {
           {items.map((it) => {
             const overdue = it.due_date < today;
             return (
-              <li
-                key={it.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-foreground/10 px-4 py-3"
-              >
-                <div>
-                  <div className="font-medium">
-                    {it.service?.name}{" "}
-                    <span className="text-foreground/40">·</span>{" "}
-                    <span className="text-sm font-normal text-foreground/60">
-                      {it.spot?.name}
-                    </span>
-                  </div>
-                  {it.service ? (
-                    <div className="mt-0.5 text-xs text-foreground/50">
-                      {freqLabel(
-                        it.service.frequency_value,
-                        it.service.frequency_unit,
-                      )}
+              <li key={it.id}>
+                <Link
+                  href={`/spots/${it.spot_id}`}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-foreground/10 px-4 py-3 hover:border-foreground/30"
+                >
+                  <div>
+                    <div className="font-medium">
+                      {it.service?.name}{" "}
+                      <span className="text-foreground/40">·</span>{" "}
+                      <span className="text-sm font-normal text-foreground/60">
+                        {it.spot?.name}
+                      </span>
                     </div>
-                  ) : null}
-                </div>
-                <div className="text-right">
-                  <div
-                    className={`text-sm font-medium ${
-                      overdue ? "text-red-600" : "text-foreground/80"
-                    }`}
-                  >
-                    {overdue ? "Overdue" : "Due"} {it.due_date}
+                    {it.service ? (
+                      <div className="mt-0.5 text-xs text-foreground/50">
+                        {freqLabel(
+                          it.service.frequency_value,
+                          it.service.frequency_unit,
+                        )}
+                      </div>
+                    ) : null}
                   </div>
-                  {it.status === "booked" ? (
-                    <div className="text-xs text-foreground/50">booked</div>
-                  ) : null}
-                </div>
+                  <div className="text-right">
+                    <div
+                      className={`text-sm font-medium ${
+                        overdue ? "text-red-600" : "text-foreground/80"
+                      }`}
+                    >
+                      {overdue ? "Overdue" : "Due"} {it.due_date}
+                    </div>
+                    {it.status === "booked" ? (
+                      <div className="text-xs text-foreground/50">booked</div>
+                    ) : null}
+                  </div>
+                </Link>
               </li>
             );
           })}

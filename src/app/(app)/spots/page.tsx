@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { HomeLink } from "@/components/home-link";
 
 export default async function SpotsPage() {
   const supabase = await createClient();
@@ -11,7 +12,10 @@ export default async function SpotsPage() {
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
       <header className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Your spots</h1>
+        <div className="flex items-center gap-3">
+          <HomeLink />
+          <h1 className="text-2xl font-semibold">Your spots</h1>
+        </div>
         <Link
           href="/spots/new"
           className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background"

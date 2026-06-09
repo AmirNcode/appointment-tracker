@@ -6,7 +6,9 @@ import {
   deleteService,
   deleteSpot,
   updateBooking,
+  updateService,
 } from "@/actions/spots";
+import { HomeLink } from "@/components/home-link";
 
 const inputCls =
   "rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40";
@@ -48,23 +50,39 @@ export default async function SpotDetailPage({
         ← Spots
       </Link>
 
-      <h1 className="mt-3 text-2xl font-semibold">{spot.name}</h1>
+      <div className="mt-3 flex items-center gap-3">
+        <HomeLink />
+        <h1 className="text-2xl font-semibold">{spot.name}</h1>
+      </div>
       {spot.formatted_address ? (
         <p className="mt-1 text-sm text-foreground/60">{spot.formatted_address}</p>
       ) : null}
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
         {spot.phone ? (
-          <a href={`tel:${spot.phone}`} className="text-foreground/70 underline underline-offset-4">
+          <a
+            href={`tel:${spot.phone}`}
+            className="text-foreground/70 underline underline-offset-4"
+          >
             {spot.phone}
           </a>
         ) : null}
         {spot.website_url ? (
-          <a href={spot.website_url} target="_blank" rel="noreferrer" className="text-foreground/70 underline underline-offset-4">
+          <a
+            href={spot.website_url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground/70 underline underline-offset-4"
+          >
             Website
           </a>
         ) : null}
         {spot.google_maps_uri ? (
-          <a href={spot.google_maps_uri} target="_blank" rel="noreferrer" className="text-foreground/70 underline underline-offset-4">
+          <a
+            href={spot.google_maps_uri}
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground/70 underline underline-offset-4"
+          >
             Maps
           </a>
         ) : null}
@@ -76,24 +94,77 @@ export default async function SpotDetailPage({
         {services && services.length > 0 ? (
           <ul className="mt-3 flex flex-col gap-2">
             {services.map((svc) => (
-              <li
-                key={svc.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-foreground/10 px-3 py-2"
-              >
-                <span>
-                  <span className="font-medium">{svc.name}</span>{" "}
-                  <span className="text-sm text-foreground/60">
-                    · {freqLabel(svc.frequency_value, svc.frequency_unit)}
-                  </span>
-                </span>
-                <form action={deleteService.bind(null, svc.id, spot.id)}>
-                  <button
-                    type="submit"
-                    className="text-sm text-foreground/50 underline underline-offset-4"
-                  >
-                    Remove
-                  </button>
-                </form>
+              <li key={svc.id} className="rounded-lg border border-foreground/10">
+                <details>
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2">
+                    <span>
+                      <span className="font-medium">{svc.name}</span>{" "}
+                      <span className="text-sm text-foreground/60">
+                        · {freqLabel(svc.frequency_value, svc.frequency_unit)}
+                      </span>
+                    </span>
+                    <span className="text-sm text-foreground/50 underline underline-offset-4">
+                      Edit
+                    </span>
+                  </summary>
+                  <div className="border-t border-foreground/10 p-3">
+                    <form
+                      action={updateService.bind(null, svc.id, spot.id)}
+                      className="flex flex-wrap items-end gap-2"
+                    >
+                      <label className="flex grow flex-col gap-1 text-xs">
+                        Service
+                        <input
+                          name="name"
+                          type="text"
+                          required
+                          defaultValue={svc.name}
+                          className={inputCls}
+                        />
+                      </label>
+                      <label className="flex w-16 flex-col gap-1 text-xs">
+                        Every
+                        <input
+                          name="frequencyValue"
+                          type="number"
+                          min={1}
+                          required
+                          defaultValue={svc.frequency_value}
+                          className={inputCls}
+                        />
+                      </label>
+                      <label className="flex w-24 flex-col gap-1 text-xs">
+                        Unit
+                        <select
+                          name="frequencyUnit"
+                          defaultValue={svc.frequency_unit}
+                          className={inputCls}
+                        >
+                          <option value="day">days</option>
+                          <option value="week">weeks</option>
+                          <option value="month">months</option>
+                        </select>
+                      </label>
+                      <button
+                        type="submit"
+                        className="rounded-lg bg-foreground px-3 py-2 text-sm font-medium text-background"
+                      >
+                        Save
+                      </button>
+                    </form>
+                    <form
+                      action={deleteService.bind(null, svc.id, spot.id)}
+                      className="mt-3"
+                    >
+                      <button
+                        type="submit"
+                        className="text-sm text-red-600 underline underline-offset-4"
+                      >
+                        Remove this service
+                      </button>
+                    </form>
+                  </div>
+                </details>
               </li>
             ))}
           </ul>
@@ -108,11 +179,24 @@ export default async function SpotDetailPage({
         >
           <label className="flex grow flex-col gap-1 text-xs">
             Service
-            <input name="name" type="text" required placeholder="e.g. Waxing" className={inputCls} />
+            <input
+              name="name"
+              type="text"
+              required
+              placeholder="e.g. Waxing"
+              className={inputCls}
+            />
           </label>
           <label className="flex w-16 flex-col gap-1 text-xs">
             Every
-            <input name="frequencyValue" type="number" min={1} defaultValue={5} required className={inputCls} />
+            <input
+              name="frequencyValue"
+              type="number"
+              min={1}
+              defaultValue={5}
+              required
+              className={inputCls}
+            />
           </label>
           <label className="flex w-24 flex-col gap-1 text-xs">
             Unit
@@ -144,7 +228,11 @@ export default async function SpotDetailPage({
         >
           <label className="flex w-40 flex-col gap-1 text-xs">
             Method
-            <select name="bookingMethod" defaultValue={spot.booking_method} className={inputCls}>
+            <select
+              name="bookingMethod"
+              defaultValue={spot.booking_method}
+              className={inputCls}
+            >
               <option value="phone">Phone</option>
               <option value="website">Website / link</option>
               <option value="other">Other</option>

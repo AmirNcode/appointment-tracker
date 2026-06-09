@@ -230,6 +230,33 @@ export async function addService(
   revalidatePath("/dashboard");
 }
 
+// Edit a service's name + frequency. The existing open appointment keeps its
+// due date; the new frequency applies to the next cycle (after completion).
+export async function updateService(
+  serviceId: string,
+  spotId: string,
+  formData: FormData,
+): Promise<void> {
+  const { supabase } = await requireUser();
+  const name = String(formData.get("name") ?? "").trim();
+  const frequencyValue = Number(formData.get("frequencyValue"));
+  const frequencyUnit = String(
+    formData.get("frequencyUnit") ?? "week",
+  ) as FrequencyUnit;
+  if (!name || !Number.isInteger(frequencyValue) || frequencyValue <= 0) return;
+
+  await supabase
+    .from("services")
+    .update({
+      name,
+      frequency_value: frequencyValue,
+      frequency_unit: frequencyUnit,
+    })
+    .eq("id", serviceId);
+  revalidatePath(`/spots/${spotId}`);
+  revalidatePath("/dashboard");
+}
+
 // Removing a service cascades its appointments + reminders (FK on delete).
 export async function deleteService(
   serviceId: string,
