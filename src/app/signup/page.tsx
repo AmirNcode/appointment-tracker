@@ -78,6 +78,18 @@ export default function SignupPage() {
             >
               {pending ? "Creating account…" : "Create account"}
             </button>
+
+            <p className="text-xs text-foreground/50">
+              By creating an account you agree to our{" "}
+              <Link href="/terms" className="underline underline-offset-4">
+                Terms
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="underline underline-offset-4">
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </form>
         )}
 

@@ -32,8 +32,14 @@ export default function Home() {
           </Link>
         </div>
 
-        <p className="mt-10 font-mono text-xs text-foreground/40">
-          Phase&nbsp;0 scaffold · Next.js&nbsp;16 · Supabase · Tailwind&nbsp;v4
+        <p className="mt-10 text-xs text-foreground/40">
+          <Link href="/privacy" className="underline underline-offset-4">
+            Privacy
+          </Link>
+          {" · "}
+          <Link href="/terms" className="underline underline-offset-4">
+            Terms
+          </Link>
         </p>
       </div>
     </main>

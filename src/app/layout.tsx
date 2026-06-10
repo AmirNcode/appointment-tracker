@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,15 @@ export const metadata: Metadata = {
   title: "Beauty Appointment Scheduler",
   description:
     "Save the spots you visit, set how often you go, get reminded before you're due, and add it to your calendar in one tap.",
+  appleWebApp: {
+    capable: true,
+    title: "Beauty Scheduler",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({

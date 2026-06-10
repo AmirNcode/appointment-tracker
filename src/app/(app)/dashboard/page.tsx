@@ -37,7 +37,7 @@ export default async function DashboardPage() {
           <HomeLink />
           <h1 className="text-2xl font-semibold">Dashboard</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
           <Link
             href="/spots"
             className="text-sm font-medium underline underline-offset-4"
@@ -49,6 +49,12 @@ export default async function DashboardPage() {
             className="text-sm font-medium underline underline-offset-4"
           >
             Spend
+          </Link>
+          <Link
+            href="/settings"
+            className="text-sm font-medium underline underline-offset-4"
+          >
+            Settings
           </Link>
           <form action={signOut}>
             <button

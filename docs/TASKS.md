@@ -166,18 +166,18 @@
 ## Phase 9 — Privacy, PWA & launch
 *Serves REQ §8, §2, §10, §12. Goal: installable, compliant, and live.*
 
-- [ ] **T9.1 — PWA manifest + icons + installability** · _Serves:_ REQ §2 · _Depends:_ T0.2
-  _Done when:_ the app passes an install check and adds to a phone home screen.
-- [ ] **T9.2 — Delete account + cascade data deletion** · _Serves:_ REQ §8 · _Depends:_ T2.6, T1.2
-  _Done when:_ deleting an account removes every owned row (verified in the DB).
-- [ ] **T9.3 — Privacy policy + terms pages + consent copy** · _Serves:_ REQ §8 · _Depends:_ —
-  _Done when:_ both pages are reachable and the sign-up consent text is accurate.
+- [x] **T9.1 — PWA manifest + icons + installability** · _Serves:_ REQ §2 · _Depends:_ T0.2
+  _Done when:_ the app passes an install check and adds to a phone home screen. ✅ `app/manifest.ts` (standalone, theme/bg color, 192/512 + maskable icons), ImageResponse-generated `/icon-192` `/icon-512` `apple-icon`, `icon.svg` favicon, `appleWebApp` + `themeColor` in layout. ⏳ Spot-check the install prompt on a phone.
+- [x] **T9.2 — Delete account + cascade data deletion** · _Serves:_ REQ §8 · _Depends:_ T2.6, T1.2
+  _Done when:_ deleting an account removes every owned row (verified in the DB). ✅ `deleteAccount` (admin `auth.admin.deleteUser` → cascades profiles→spots→services→appointments→reminders via FKs) + confirm button on `/settings`; signs out + redirects home.
+- [x] **T9.3 — Privacy policy + terms pages + consent copy** · _Serves:_ REQ §8 · _Depends:_ —
+  _Done when:_ both pages are reachable and the sign-up consent text is accurate. ✅ `/privacy` + `/terms` (app-specific), sign-up consent line linking both, footer links on the landing page. _(Templates — have reviewed and set a real support contact before launch.)_
 - [ ] **T9.4 — Usage/cost monitoring** for Places + email · _Serves:_ REQ §10 · _Depends:_ T3.2, T6.4
-  _Done when:_ an alert fires (or a dashboard shows) when usage nears the free tier.
+  _Done when:_ an alert fires (or a dashboard shows) when usage nears the free tier. ⏳ **Founder step:** set budget/usage alerts in Google Cloud (Places) and watch Resend's dashboard — both require your account access.
 - [ ] **T9.5 — Production deploy + custom domain + final env** · _Serves:_ REQ §3, §10 · _Depends:_ T0.5
-  _Done when:_ the production domain serves the app over HTTPS with production env vars.
+  _Done when:_ the production domain serves the app over HTTPS with production env vars. 🟡 App auto-deploys to its Vercel URL over HTTPS already. ⏳ **Founder step:** add a custom domain in Vercel + DNS, then update `APP_URL` (and `EMAIL_FROM` if you move off jivanmag.com).
 - [ ] **T9.6 — End-to-end Definition-of-Done walkthrough** · _Serves:_ REQ §12 · _Depends:_ all prior
-  _Done when:_ one user completes the full §12 journey — sign up → add spot+service+frequency → see due date → receive the reminder → tap through to book → confirm with date/time → add to calendar via `.ics` → log spend — with no manual DB intervention.
+  _Done when:_ one user completes the full §12 journey — sign up → add spot+service+frequency → see due date → receive the reminder → tap through to book → confirm with date/time → add to calendar via `.ics` → log spend — with no manual DB intervention. ⏳ **Founder step:** a manual run-through on the live site (also confirms live email + .ics import).
 
 ---
 
