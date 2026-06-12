@@ -27,11 +27,17 @@ function apiKey(): string {
   return key;
 }
 
+type Circle = { lat: number; lng: number; radiusMeters: number };
+
 export type AutocompleteOptions = {
-  // Soft-bias results toward a circle (center + radius in metres). Results may
-  // still include strong matches outside it — which is what lets a spot in a
-  // neighbouring municipality (e.g. Richmond Hill vs Toronto) still surface.
-  bias?: { lat: number; lng: number; radiusMeters: number };
+  // Soft-bias results toward a circle. Only nudges ranking — does NOT exclude
+  // far-away matches, so a query with no local hit still returns global noise.
+  bias?: Circle;
+  // Hard-restrict results to a circle (center + radius in metres). Anything
+  // outside is dropped. The radius is sized to cover the whole metro, so a spot
+  // in a neighbouring municipality (Richmond Hill/Markham vs Toronto) is still
+  // included, while results in other cities/countries are excluded.
+  restrict?: Circle;
   // Restrict suggestions to these primary types (e.g. ["locality"] for cities).
   includedPrimaryTypes?: string[];
 };
@@ -46,7 +52,16 @@ export async function placesAutocomplete(
     sessionToken,
     regionCode: "CA",
   };
-  if (opts.bias) {
+  // locationBias and locationRestriction are mutually exclusive — restriction
+  // wins if both are somehow provided.
+  if (opts.restrict) {
+    body.locationRestriction = {
+      circle: {
+        center: { latitude: opts.restrict.lat, longitude: opts.restrict.lng },
+        radius: opts.restrict.radiusMeters,
+      },
+    };
+  } else if (opts.bias) {
     body.locationBias = {
       circle: {
         center: { latitude: opts.bias.lat, longitude: opts.bias.lng },

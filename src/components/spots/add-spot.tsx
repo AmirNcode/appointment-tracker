@@ -184,6 +184,14 @@ export function AddSpot() {
         {query.trim().length > 0 && query.trim().length < 3 ? (
           <p className="mt-2 text-xs text-muted">Keep typing…</p>
         ) : null}
+        {query.trim().length >= 3 &&
+        suggestions.length === 0 &&
+        !loadingDetails ? (
+          <p className="mt-3 text-xs text-muted">
+            No places found in your area for that. Try the full name, or add it
+            manually below. ✍️
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={startManual}
