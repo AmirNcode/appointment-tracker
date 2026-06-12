@@ -18,7 +18,7 @@ export function DeleteAccountButton() {
     >
       <button
         type="submit"
-        className="text-sm font-medium text-red-600 underline underline-offset-4"
+        className="text-sm font-medium text-danger underline underline-offset-4"
       >
         Delete my account
       </button>

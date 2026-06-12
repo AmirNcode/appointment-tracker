@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "@/actions/auth";
 import { todayInTimeZone } from "@/lib/domain/scheduling";
-import { HomeLink } from "@/components/home-link";
+import { Brand } from "@/components/brand";
 
 function freqLabel(value: number, unit: string) {
   return `every ${value} ${unit}${value === 1 ? "" : "s"}`;
@@ -30,94 +29,73 @@ export default async function DashboardPage() {
     .in("status", ["due", "booked"])
     .order("due_date", { ascending: true });
 
+  const overdueCount = (items ?? []).filter(
+    (it) => it.status !== "booked" && it.due_date < today,
+  ).length;
+
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 pt-[calc(1.5rem+env(safe-area-inset-top))]">
       <header className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <HomeLink />
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-          <Link
-            href="/spots"
-            className="text-sm font-medium underline underline-offset-4"
-          >
-            Your spots
-          </Link>
-          <Link
-            href="/spend"
-            className="text-sm font-medium underline underline-offset-4"
-          >
-            Spend
-          </Link>
-          <Link
-            href="/settings"
-            className="text-sm font-medium underline underline-offset-4"
-          >
-            Settings
-          </Link>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="rounded-lg border border-foreground/20 px-3 py-1.5 text-sm font-medium text-foreground"
-            >
-              Log out
-            </button>
-          </form>
-        </div>
+        <Brand />
+        <Link href="/spots/new" className="btn btn-primary btn-sm">
+          ＋ Add spot
+        </Link>
       </header>
 
-      <p className="mt-4 text-sm text-foreground/70">
-        Signed in as <span className="font-medium">{user.email}</span>.
+      <h1 className="font-display mt-6 text-3xl font-semibold leading-tight">
+        Hi, lovely ✨
+      </h1>
+      <p className="mt-1 text-sm text-muted">
+        {overdueCount > 0
+          ? `You have ${overdueCount} thing${overdueCount === 1 ? "" : "s"} overdue — let's get you booked. 💖`
+          : "Here's what's coming up for you."}
       </p>
 
-      <h2 className="mt-8 text-sm font-semibold">Upcoming &amp; overdue</h2>
+      <h2 className="mt-8 text-xs font-semibold uppercase tracking-wide text-muted">
+        Upcoming &amp; overdue
+      </h2>
+
       {!items || items.length === 0 ? (
-        <p className="mt-3 text-sm text-foreground/60">
-          Nothing due yet.{" "}
-          <Link href="/spots/new" className="underline underline-offset-4">
-            Add a spot
-          </Link>{" "}
-          to get started.
-        </p>
+        <div className="card mt-3 flex flex-col items-center gap-3 px-6 py-10 text-center">
+          <span className="text-4xl">🌸</span>
+          <p className="text-sm text-muted">
+            Nothing due yet. Add a spot you visit and we&apos;ll keep track of
+            when you&apos;re due.
+          </p>
+          <Link href="/spots/new" className="btn btn-primary btn-sm">
+            ＋ Add your first spot
+          </Link>
+        </div>
       ) : (
-        <ul className="mt-3 flex flex-col gap-2">
+        <ul className="mt-3 flex flex-col gap-2.5">
           {items.map((it) => {
-            const overdue = it.due_date < today;
+            const overdue = it.status !== "booked" && it.due_date < today;
             return (
               <li key={it.id}>
                 <Link
                   href={`/appointments/${it.id}`}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-foreground/10 px-4 py-3 hover:border-foreground/30"
+                  className="card flex items-center justify-between gap-3 px-4 py-3.5 transition-transform active:scale-[0.99]"
                 >
-                  <div>
-                    <div className="font-medium">
-                      {it.service?.name}{" "}
-                      <span className="text-foreground/40">·</span>{" "}
-                      <span className="text-sm font-normal text-foreground/60">
-                        {it.spot?.name}
-                      </span>
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">
+                      {it.service?.name}
                     </div>
-                    {it.service ? (
-                      <div className="mt-0.5 text-xs text-foreground/50">
-                        {freqLabel(
-                          it.service.frequency_value,
-                          it.service.frequency_unit,
-                        )}
-                      </div>
-                    ) : null}
+                    <div className="mt-0.5 truncate text-xs text-muted">
+                      {it.spot?.name}
+                      {it.service
+                        ? ` · ${freqLabel(it.service.frequency_value, it.service.frequency_unit)}`
+                        : ""}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div
-                      className={`text-sm font-medium ${
-                        overdue ? "text-red-600" : "text-foreground/80"
-                      }`}
-                    >
-                      {overdue ? "Overdue" : "Due"} {it.due_date}
-                    </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
                     {it.status === "booked" ? (
-                      <div className="text-xs text-foreground/50">booked</div>
-                    ) : null}
+                      <span className="chip chip-accent">📅 Booked</span>
+                    ) : overdue ? (
+                      <span className="chip chip-danger">⏰ Overdue</span>
+                    ) : (
+                      <span className="chip chip-muted">Due</span>
+                    )}
+                    <span className="text-xs text-muted">{it.due_date}</span>
                   </div>
                 </Link>
               </li>

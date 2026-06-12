@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy · Beauty Scheduler",
+  title: "Privacy Policy",
 };
 
 const CONTACT_EMAIL = "support@jivanmag.com";
@@ -13,12 +13,12 @@ export default function PrivacyPage() {
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-12">
       <Link
         href="/"
-        className="text-sm text-foreground/60 underline underline-offset-4"
+        className="text-sm text-muted underline underline-offset-4"
       >
         ← Home
       </Link>
       <h1 className="mt-4 text-2xl font-semibold">Privacy Policy</h1>
-      <p className="mt-1 text-sm text-foreground/50">Last updated: {UPDATED}</p>
+      <p className="mt-1 text-sm text-muted">Last updated: {UPDATED}</p>
 
       <div className="mt-8 flex flex-col gap-6 text-sm leading-6 text-foreground/80">
         <section>
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-2">
             When you create an account we store your email address. As you use
-            Beauty Scheduler, we store the data you enter: the businesses
+            Lumi, we store the data you enter: the businesses
             (&ldquo;spots&rdquo;) you save, the services and frequencies you set,
             your appointments and any costs you record, your timezone, and your
             reminder preferences.

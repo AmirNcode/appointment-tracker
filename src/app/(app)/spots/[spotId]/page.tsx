@@ -2,11 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { addService, deleteSpot, updateBooking } from "@/actions/spots";
-import { HomeLink } from "@/components/home-link";
 import { ServiceItem } from "@/components/spots/service-item";
-
-const inputCls =
-  "rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40";
 
 export default async function SpotDetailPage({
   params,
@@ -33,28 +29,22 @@ export default async function SpotDetailPage({
     .order("created_at", { ascending: true });
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-10">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 pt-[calc(1.25rem+env(safe-area-inset-top))]">
       <Link
         href="/spots"
-        className="text-sm text-foreground/60 underline underline-offset-4"
+        className="text-sm font-medium text-muted underline underline-offset-4"
       >
         ← Spots
       </Link>
 
-      <div className="mt-3 flex items-center gap-3">
-        <HomeLink />
-        <h1 className="text-2xl font-semibold">{spot.name}</h1>
-      </div>
+      <h1 className="font-display mt-3 text-2xl font-semibold">{spot.name}</h1>
       {spot.formatted_address ? (
-        <p className="mt-1 text-sm text-foreground/60">{spot.formatted_address}</p>
+        <p className="mt-1 text-sm text-muted">{spot.formatted_address}</p>
       ) : null}
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+      <div className="mt-3 flex flex-wrap gap-2 text-sm">
         {spot.phone ? (
-          <a
-            href={`tel:${spot.phone}`}
-            className="text-foreground/70 underline underline-offset-4"
-          >
-            {spot.phone}
+          <a href={`tel:${spot.phone}`} className="chip chip-accent">
+            📞 {spot.phone}
           </a>
         ) : null}
         {spot.website_url ? (
@@ -62,9 +52,9 @@ export default async function SpotDetailPage({
             href={spot.website_url}
             target="_blank"
             rel="noreferrer"
-            className="text-foreground/70 underline underline-offset-4"
+            className="chip chip-accent"
           >
-            Website
+            🌐 Website
           </a>
         ) : null}
         {spot.google_maps_uri ? (
@@ -72,42 +62,44 @@ export default async function SpotDetailPage({
             href={spot.google_maps_uri}
             target="_blank"
             rel="noreferrer"
-            className="text-foreground/70 underline underline-offset-4"
+            className="chip chip-accent"
           >
-            Maps
+            🗺️ Maps
           </a>
         ) : null}
       </div>
 
       {/* Services */}
       <section className="mt-8">
-        <h2 className="text-sm font-semibold">Services</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          Services 💅
+        </h2>
         {services && services.length > 0 ? (
-          <ul className="mt-3 flex flex-col gap-2">
+          <ul className="mt-3 flex flex-col gap-2.5">
             {services.map((svc) => (
               <ServiceItem key={svc.id} service={svc} spotId={spot.id} />
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-foreground/60">No services yet.</p>
+          <p className="mt-3 text-sm text-muted">No services yet.</p>
         )}
 
         {/* Add a service */}
         <form
           action={addService.bind(null, spot.id)}
-          className="mt-4 flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-foreground/20 p-3"
+          className="card mt-3 flex flex-wrap items-end gap-3 p-4"
         >
-          <label className="flex grow flex-col gap-1 text-xs">
+          <label className="field-label grow">
             Service
             <input
               name="name"
               type="text"
               required
               placeholder="e.g. Waxing"
-              className={inputCls}
+              className="input"
             />
           </label>
-          <label className="flex w-16 flex-col gap-1 text-xs">
+          <label className="field-label w-20">
             Every
             <input
               name="frequencyValue"
@@ -115,25 +107,22 @@ export default async function SpotDetailPage({
               min={1}
               defaultValue={5}
               required
-              className={inputCls}
+              className="input"
             />
           </label>
-          <label className="flex w-24 flex-col gap-1 text-xs">
+          <label className="field-label w-28">
             Unit
-            <select name="frequencyUnit" defaultValue="week" className={inputCls}>
+            <select name="frequencyUnit" defaultValue="week" className="input">
               <option value="day">days</option>
               <option value="week">weeks</option>
               <option value="month">months</option>
             </select>
           </label>
-          <label className="flex w-36 flex-col gap-1 text-xs">
+          <label className="field-label w-40">
             Last visit (optional)
-            <input name="anchorDate" type="date" className={inputCls} />
+            <input name="anchorDate" type="date" className="input" />
           </label>
-          <button
-            type="submit"
-            className="rounded-lg bg-foreground px-3 py-2 text-sm font-medium text-background"
-          >
+          <button type="submit" className="btn btn-primary btn-sm">
             Add
           </button>
         </form>
@@ -141,48 +130,47 @@ export default async function SpotDetailPage({
 
       {/* Booking method */}
       <section className="mt-8">
-        <h2 className="text-sm font-semibold">Booking method</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          How you book
+        </h2>
         <form
           action={updateBooking.bind(null, spot.id)}
-          className="mt-3 flex flex-wrap items-end gap-2"
+          className="card mt-3 flex flex-wrap items-end gap-3 p-4"
         >
-          <label className="flex w-40 flex-col gap-1 text-xs">
+          <label className="field-label w-44">
             Method
             <select
               name="bookingMethod"
               defaultValue={spot.booking_method}
-              className={inputCls}
+              className="input"
             >
               <option value="phone">Phone</option>
               <option value="website">Website / link</option>
               <option value="other">Other</option>
             </select>
           </label>
-          <label className="flex grow flex-col gap-1 text-xs">
+          <label className="field-label grow">
             Booking URL (for website)
             <input
               name="bookingUrl"
               type="url"
               defaultValue={spot.booking_url ?? ""}
               placeholder="https://…"
-              className={inputCls}
+              className="input"
             />
           </label>
-          <button
-            type="submit"
-            className="rounded-lg border border-foreground/20 px-3 py-2 text-sm font-medium"
-          >
+          <button type="submit" className="btn btn-secondary btn-sm">
             Save
           </button>
         </form>
       </section>
 
       {/* Danger zone */}
-      <section className="mt-12 border-t border-foreground/10 pt-6">
+      <section className="mt-12 border-t border-border pt-6">
         <form action={deleteSpot.bind(null, spot.id)}>
           <button
             type="submit"
-            className="text-sm font-medium text-red-600 underline underline-offset-4"
+            className="text-sm font-medium text-danger underline underline-offset-4"
           >
             Delete this spot
           </button>

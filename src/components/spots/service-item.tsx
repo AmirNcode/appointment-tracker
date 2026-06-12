@@ -3,9 +3,6 @@
 import { useState } from "react";
 import { deleteService, updateService } from "@/actions/spots";
 
-const inputCls =
-  "rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40";
-
 type Service = {
   id: string;
   name: string;
@@ -28,15 +25,16 @@ export function ServiceItem({
   const [editing, setEditing] = useState(false);
 
   return (
-    <li className="rounded-lg border border-foreground/10">
-      <div className="flex items-center justify-between gap-3 px-3 py-2">
+    <li className="card overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
+        {/* Whole row taps open the editor (Edit button kept too). */}
         <button
           type="button"
           onClick={() => setEditing((v) => !v)}
-          className="flex grow items-center gap-1 text-left"
+          className="flex grow items-center gap-2 text-left"
         >
           <span className="font-medium">{service.name}</span>
-          <span className="text-sm text-foreground/60">
+          <span className="text-sm text-muted">
             · {freqLabel(service.frequency_value, service.frequency_unit)}
           </span>
         </button>
@@ -44,7 +42,7 @@ export function ServiceItem({
           <button
             type="button"
             onClick={() => setEditing((v) => !v)}
-            className="text-foreground/60 underline underline-offset-4"
+            className="font-medium text-accent-strong"
           >
             {editing ? "Close" : "Edit"}
           </button>
@@ -60,10 +58,7 @@ export function ServiceItem({
               }
             }}
           >
-            <button
-              type="submit"
-              className="text-red-600 underline underline-offset-4"
-            >
+            <button type="submit" className="font-medium text-danger">
               Delete
             </button>
           </form>
@@ -71,22 +66,22 @@ export function ServiceItem({
       </div>
 
       {editing ? (
-        <div className="border-t border-foreground/10 p-3">
+        <div className="border-t border-border bg-surface-soft p-4">
           <form
             action={updateService.bind(null, service.id, spotId)}
-            className="flex flex-wrap items-end gap-2"
+            className="flex flex-wrap items-end gap-3"
           >
-            <label className="flex grow flex-col gap-1 text-xs">
+            <label className="field-label grow">
               Service
               <input
                 name="name"
                 type="text"
                 required
                 defaultValue={service.name}
-                className={inputCls}
+                className="input"
               />
             </label>
-            <label className="flex w-16 flex-col gap-1 text-xs">
+            <label className="field-label w-20">
               Every
               <input
                 name="frequencyValue"
@@ -94,38 +89,35 @@ export function ServiceItem({
                 min={1}
                 required
                 defaultValue={service.frequency_value}
-                className={inputCls}
+                className="input"
               />
             </label>
-            <label className="flex w-24 flex-col gap-1 text-xs">
+            <label className="field-label w-28">
               Unit
               <select
                 name="frequencyUnit"
                 defaultValue={service.frequency_unit}
-                className={inputCls}
+                className="input"
               >
                 <option value="day">days</option>
                 <option value="week">weeks</option>
                 <option value="month">months</option>
               </select>
             </label>
-            <label className="flex w-36 flex-col gap-1 text-xs">
+            <label className="field-label w-40">
               Last visit
               <input
                 name="anchorDate"
                 type="date"
                 defaultValue={service.anchor_date ?? ""}
-                className={inputCls}
+                className="input"
               />
             </label>
-            <button
-              type="submit"
-              className="rounded-lg bg-foreground px-3 py-2 text-sm font-medium text-background"
-            >
+            <button type="submit" className="btn btn-primary btn-sm">
               Save
             </button>
           </form>
-          <p className="mt-2 text-xs text-foreground/40">
+          <p className="mt-2 text-xs text-muted">
             Setting a last-visit date recalculates when this is next due.
           </p>
         </div>

@@ -10,11 +10,11 @@ export function WelcomeEmail({
   optedIn: boolean;
 }) {
   return (
-    <EmailShell preview="Welcome to Beauty Scheduler">
-      <Text style={emailStyles.heading}>Welcome 👋</Text>
+    <EmailShell preview="Welcome to Lumi">
+      <Text style={emailStyles.heading}>Welcome to Lumi 💅</Text>
       <Text style={emailStyles.text}>
         Thanks for signing up. Add the places you visit and the services you get,
-        and Beauty Scheduler will keep track of when each one is due.
+        and Lumi will keep track of when each one is due.
       </Text>
       {optedIn ? (
         <Text style={emailStyles.muted}>
@@ -24,7 +24,7 @@ export function WelcomeEmail({
       ) : null}
       <Section>
         <Button href={loginUrl} style={emailStyles.button}>
-          Open Beauty Scheduler
+          Open Lumi
         </Button>
       </Section>
     </EmailShell>

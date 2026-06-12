@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { updateReminderOptIn } from "@/actions/account";
-import { HomeLink } from "@/components/home-link";
+import { signOut } from "@/actions/auth";
 import { DeleteAccountButton } from "@/components/account/delete-account-button";
 
 export default async function SettingsPage() {
@@ -19,54 +18,56 @@ export default async function SettingsPage() {
   const optedIn = profile?.email_reminders_opt_in ?? false;
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-10">
-      <Link
-        href="/dashboard"
-        className="text-sm text-foreground/60 underline underline-offset-4"
-      >
-        ← Dashboard
-      </Link>
-
-      <div className="mt-3 flex items-center gap-3">
-        <HomeLink />
-        <h1 className="text-2xl font-semibold">Settings</h1>
-      </div>
-      <p className="mt-4 text-sm text-foreground/70">
-        Signed in as <span className="font-medium">{user.email}</span>.
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 pt-[calc(1.5rem+env(safe-area-inset-top))]">
+      <h1 className="font-display text-2xl font-semibold">Settings ⚙️</h1>
+      <p className="mt-2 text-sm text-muted">
+        Signed in as <span className="font-medium text-foreground">{user.email}</span>
       </p>
 
       {/* Email reminders */}
       <section className="mt-8">
-        <h2 className="text-sm font-semibold">Email reminders</h2>
-        <form
-          action={updateReminderOptIn}
-          className="mt-3 flex flex-wrap items-center gap-3"
-        >
-          <label className="flex items-center gap-2 text-sm">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          Email reminders 💌
+        </h2>
+        <form action={updateReminderOptIn} className="card mt-3 p-4">
+          <label className="flex items-start gap-3 text-sm">
             <input
               type="checkbox"
               name="emailReminders"
               defaultChecked={optedIn}
-              className="h-4 w-4"
+              className="mt-0.5 h-5 w-5 accent-[var(--accent)]"
             />
-            Email me when an appointment is due
+            <span>Email me a gentle nudge when an appointment is due.</span>
           </label>
-          <button
-            type="submit"
-            className="rounded-lg border border-foreground/20 px-3 py-1.5 text-sm font-medium"
-          >
-            Save
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <p className="text-xs text-muted">
+              Timezone: {profile?.timezone ?? "America/Toronto"}
+            </p>
+            <button type="submit" className="btn btn-secondary btn-sm">
+              Save
+            </button>
+          </div>
+        </form>
+      </section>
+
+      {/* Account */}
+      <section className="mt-8">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          Account
+        </h2>
+        <form action={signOut} className="mt-3">
+          <button type="submit" className="btn btn-secondary">
+            Log out
           </button>
         </form>
-        <p className="mt-2 text-xs text-foreground/50">
-          Timezone: {profile?.timezone ?? "America/Toronto"}
-        </p>
       </section>
 
       {/* Danger zone */}
-      <section className="mt-12 border-t border-foreground/10 pt-6">
-        <h2 className="text-sm font-semibold text-red-600">Danger zone</h2>
-        <p className="mt-2 text-sm text-foreground/60">
+      <section className="mt-10 border-t border-border pt-6">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-danger">
+          Danger zone
+        </h2>
+        <p className="mt-2 text-sm text-muted">
           Deleting your account permanently removes your profile and all of your
           spots, services, appointments, and reminders.
         </p>

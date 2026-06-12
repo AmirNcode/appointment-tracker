@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { todayInTimeZone } from "@/lib/domain/scheduling";
-import { HomeLink } from "@/components/home-link";
 
 function monthLabel(month: string): string {
   const [y, m] = month.split("-").map(Number);
@@ -47,17 +46,19 @@ function Breakdown({
   if (rows.length === 0) return null;
   return (
     <section className="mt-8">
-      <h2 className="text-sm font-semibold">{title}</h2>
-      <ul className="mt-3 flex flex-col gap-2">
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+        {title}
+      </h2>
+      <ul className="mt-3 flex flex-col gap-2.5">
         {rows
           .sort((a, b) => b[1] - a[1])
           .map(([name, total]) => (
             <li
               key={name}
-              className="flex items-center justify-between gap-3 rounded-lg border border-foreground/10 px-4 py-3 text-sm"
+              className="card flex items-center justify-between gap-3 px-4 py-3.5 text-sm"
             >
               <span>{name}</span>
-              <span className="font-medium">{money(total, currency)}</span>
+              <span className="font-semibold">{money(total, currency)}</span>
             </li>
           ))}
       </ul>
@@ -114,32 +115,22 @@ export default async function SpendPage({
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-10">
-      <Link
-        href="/dashboard"
-        className="text-sm text-foreground/60 underline underline-offset-4"
-      >
-        ← Dashboard
-      </Link>
-
-      <div className="mt-3 flex items-center gap-3">
-        <HomeLink />
-        <h1 className="text-2xl font-semibold">Spend</h1>
-      </div>
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 pt-[calc(1.5rem+env(safe-area-inset-top))]">
+      <h1 className="font-display text-2xl font-semibold">Spend 💸</h1>
 
       {/* Month selector */}
       <div className="mt-6 flex items-center justify-between gap-3">
         <Link
           href={`/spend?month=${shiftMonth(selected, -1)}`}
-          className="rounded-lg border border-foreground/20 px-3 py-1.5 text-sm"
+          className="btn btn-secondary btn-sm"
           aria-label="Previous month"
         >
           ←
         </Link>
-        <span className="text-sm font-medium">{monthLabel(selected)}</span>
+        <span className="text-sm font-semibold">{monthLabel(selected)}</span>
         <Link
           href={`/spend?month=${shiftMonth(selected, 1)}`}
-          className="rounded-lg border border-foreground/20 px-3 py-1.5 text-sm"
+          className="btn btn-secondary btn-sm"
           aria-label="Next month"
         >
           →
@@ -147,32 +138,32 @@ export default async function SpendPage({
       </div>
 
       {/* Monthly total */}
-      <div className="mt-6 rounded-lg border border-foreground/15 p-6 text-center">
-        <div className="text-xs uppercase tracking-wide text-foreground/50">
+      <div className="mt-6 rounded-3xl bg-gradient-to-br from-accent to-accent-strong px-6 py-8 text-center text-white shadow-[0_20px_40px_-20px_rgba(124,58,237,0.7)]">
+        <div className="text-xs uppercase tracking-wide text-white/70">
           Total this month
         </div>
-        <div className="mt-1 text-3xl font-semibold">
+        <div className="font-display mt-1 text-4xl font-semibold">
           {money(total, currency)}
         </div>
-        <div className="mt-1 text-xs text-foreground/50">
+        <div className="mt-1 text-xs text-white/70">
           {monthRows.length}{" "}
           {monthRows.length === 1 ? "appointment" : "appointments"}
         </div>
       </div>
 
       {monthRows.length === 0 ? (
-        <p className="mt-8 text-center text-sm text-foreground/60">
-          No completed appointments with a cost in {monthLabel(selected)}.
+        <p className="mt-8 text-center text-sm text-muted">
+          No completed appointments with a cost in {monthLabel(selected)}. 🌷
         </p>
       ) : (
         <>
           <Breakdown
-            title="By business"
+            title="By place 📍"
             rows={[...bySpot.entries()]}
             currency={currency}
           />
           <Breakdown
-            title="By service"
+            title="By service 💅"
             rows={[...byService.entries()]}
             currency={currency}
           />

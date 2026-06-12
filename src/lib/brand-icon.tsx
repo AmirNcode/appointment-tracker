@@ -1,10 +1,9 @@
 import type { ReactElement } from "react";
 
 // Shared app-icon mark for ImageResponse-generated PNGs (favicon/apple/maskable).
-// Font-free (a ring on a dark field) so it renders without loading a typeface.
+// A 💅 emoji centered on Lumi's lavender gradient. ImageResponse renders the
+// emoji via Twemoji (its default `emoji` option), so no font file is needed.
 export function brandIcon(size: number): ReactElement {
-  const ring = Math.max(4, Math.round(size * 0.08));
-  const inner = Math.round(size * 0.5);
   return (
     <div
       style={{
@@ -13,17 +12,12 @@ export function brandIcon(size: number): ReactElement {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#0f172a",
+        background: "linear-gradient(145deg, #a78bfa 0%, #7c3aed 100%)",
+        fontSize: Math.round(size * 0.56),
+        lineHeight: 1,
       }}
     >
-      <div
-        style={{
-          width: `${inner}px`,
-          height: `${inner}px`,
-          borderRadius: "9999px",
-          border: `${ring}px solid #ffffff`,
-        }}
-      />
+      💅
     </div>
   );
 }

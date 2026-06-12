@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service · Beauty Scheduler",
+  title: "Terms of Service",
 };
 
 const CONTACT_EMAIL = "support@jivanmag.com";
@@ -13,20 +13,20 @@ export default function TermsPage() {
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-12">
       <Link
         href="/"
-        className="text-sm text-foreground/60 underline underline-offset-4"
+        className="text-sm text-muted underline underline-offset-4"
       >
         ← Home
       </Link>
       <h1 className="mt-4 text-2xl font-semibold">Terms of Service</h1>
-      <p className="mt-1 text-sm text-foreground/50">Last updated: {UPDATED}</p>
+      <p className="mt-1 text-sm text-muted">Last updated: {UPDATED}</p>
 
       <div className="mt-8 flex flex-col gap-6 text-sm leading-6 text-foreground/80">
         <section>
           <h2 className="text-base font-semibold text-foreground">
-            Using Beauty Scheduler
+            Using Lumi
           </h2>
           <p className="mt-2">
-            Beauty Scheduler helps you track recurring personal appointments and
+            Lumi helps you track recurring personal appointments and
             reminds you when they&rsquo;re due. It&rsquo;s intended for personal,
             non-commercial use. You&rsquo;re responsible for keeping your account
             credentials secure and for the accuracy of the information you enter.

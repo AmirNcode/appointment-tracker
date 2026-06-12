@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Fraunces } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -7,24 +7,34 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Soft display serif for the wordmark + headings — gives the elegant beauty feel.
+const fraunces = Fraunces({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
-  title: "Beauty Appointment Scheduler",
+  title: {
+    default: "Lumi — your beauty routine, on schedule",
+    template: "%s · Lumi",
+  },
   description:
-    "Save the spots you visit, set how often you go, get reminded before you're due, and add it to your calendar in one tap.",
+    "Save the spots you love, set how often you go, and Lumi nudges you before you're due — then adds it to your calendar in one tap. 💅",
+  applicationName: "Lumi",
   appleWebApp: {
     capable: true,
-    title: "Beauty Scheduler",
+    title: "Lumi",
     statusBarStyle: "default",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#faf8ff",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -35,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

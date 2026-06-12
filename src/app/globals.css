@@ -1,26 +1,188 @@
 @import "tailwindcss";
 
+/*
+ * Lumi — soft & elegant lavender theme.
+ * Single light theme (a beauty/self-care app reads best light), so we do not
+ * follow prefers-color-scheme. Tokens below drive both Tailwind utilities
+ * (bg-surface, text-accent, border-border, …) and the component classes.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf8ff; /* page — near-white lilac */
+  --foreground: #2e2a3a; /* primary text — cool near-black */
+  --surface: #ffffff; /* cards */
+  --surface-soft: #f5f1fe; /* subtle inset panels */
+  --border: #ece5fb; /* hairline borders */
+  --accent: #8b5cf6; /* violet — primary actions */
+  --accent-strong: #7c3aed; /* hover / pressed */
+  --accent-soft: #f1ebfd; /* chips, soft fills */
+  --accent-foreground: #ffffff;
+  --muted: #6f6880; /* secondary text */
+  --danger: #e11d6b; /* destructive (rose-red, on-brand) */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
+  /* Account for the iOS notch/Dynamic Island + home indicator everywhere. */
+  background: var(--background);
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* ---- Component classes (raw CSS → resilient, used across every screen) ---- */
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+/* Cards / surfaces */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem; /* 2xl-ish, soft */
+  box-shadow:
+    0 1px 2px rgba(46, 42, 58, 0.04),
+    0 8px 24px -16px rgba(124, 58, 237, 0.18);
+}
+
+/* Inputs / selects / textareas */
+.input {
+  width: 100%;
+  min-height: 44px; /* comfortable touch target */
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: var(--surface);
+  padding: 0.625rem 0.875rem;
+  font-size: 16px; /* prevents iOS zoom-on-focus */
+  color: var(--foreground);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  appearance: none;
+}
+.input::placeholder {
+  color: color-mix(in srgb, var(--muted) 70%, transparent);
+}
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.625rem 1.125rem;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    transform 0.04s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: 0 8px 20px -10px rgba(124, 58, 237, 0.7);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.btn-secondary:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.btn-sm {
+  min-height: 38px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+/* Pills / chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.chip-accent {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.chip-muted {
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+.chip-danger {
+  background: color-mix(in srgb, var(--danger) 12%, white);
+  color: var(--danger);
+}
+
+/* Field label */
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* Safe-area helpers for the standalone PWA */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }

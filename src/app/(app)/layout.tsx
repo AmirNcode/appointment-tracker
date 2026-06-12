@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { AppNav } from "@/components/app-nav";
 
 /**
  * Authenticated app shell (TASKS T1.5 — route protection).
@@ -22,5 +23,13 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-full flex-col">
+      {/* Leave room for the fixed bottom tab bar (+ iOS home indicator). */}
+      <div className="flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+        {children}
+      </div>
+      <AppNav />
+    </div>
+  );
 }

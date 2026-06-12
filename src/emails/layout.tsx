@@ -29,7 +29,7 @@ export const emailStyles = {
   muted: { fontSize: "14px", color: "#6b7280", margin: "0 0 16px" },
   button: {
     display: "inline-block",
-    backgroundColor: "#111827",
+    backgroundColor: "#7c3aed",
     color: "#ffffff",
     fontSize: "14px",
     fontWeight: 600,
@@ -57,7 +57,7 @@ export function EmailShell({
           {children}
           <Hr style={{ borderColor: "#e5e7eb", margin: "28px 0 16px" }} />
           <Text style={footerText}>
-            Beauty Scheduler
+            Lumi 💅
             {unsubscribeUrl ? (
               <>
                 {" · "}

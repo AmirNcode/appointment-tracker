@@ -19,9 +19,6 @@ const emptyService: ServiceRow = {
   anchorDate: "",
 };
 
-const inputCls =
-  "rounded-lg border border-foreground/15 bg-transparent px-3 py-2 outline-none focus:border-foreground/40";
-
 export function AddSpot() {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -161,36 +158,36 @@ export function AddSpot() {
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search a business by name…"
-          className={`${inputCls} w-full`}
+          placeholder="🔍 Search a place by name…"
+          className="input"
         />
         {loadingDetails ? (
-          <p className="mt-3 text-sm text-foreground/60">Loading…</p>
+          <p className="mt-3 text-sm text-muted">Loading…</p>
         ) : null}
-        {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
-        <ul className="mt-3 flex flex-col gap-1">
+        {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
+        <ul className="mt-3 flex flex-col gap-2">
           {suggestions.map((s) => (
             <li key={s.placeId}>
               <button
                 type="button"
                 onClick={() => pick(s.placeId)}
-                className="w-full rounded-lg border border-foreground/10 px-3 py-2 text-left hover:border-foreground/30"
+                className="card w-full px-4 py-3 text-left transition-transform active:scale-[0.99]"
               >
                 <div className="font-medium">{s.primary}</div>
                 {s.secondary ? (
-                  <div className="text-sm text-foreground/60">{s.secondary}</div>
+                  <div className="text-sm text-muted">{s.secondary}</div>
                 ) : null}
               </button>
             </li>
           ))}
         </ul>
         {query.trim().length > 0 && query.trim().length < 3 ? (
-          <p className="mt-2 text-xs text-foreground/40">Keep typing…</p>
+          <p className="mt-2 text-xs text-muted">Keep typing…</p>
         ) : null}
         <button
           type="button"
           onClick={startManual}
-          className="mt-4 text-sm font-medium text-foreground underline underline-offset-4"
+          className="mt-4 text-sm font-medium text-accent-strong underline underline-offset-4"
         >
           Can&apos;t find it? Add a place manually
         </button>
@@ -201,7 +198,7 @@ export function AddSpot() {
   // --- Configure & save step ----------------------------------------------
   return (
     <div className="mt-6 flex flex-col gap-6">
-      <div className="rounded-lg border border-foreground/15 p-4">
+      <div className="card p-4">
         {manual ? (
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
@@ -209,12 +206,12 @@ export function AddSpot() {
               <button
                 type="button"
                 onClick={reset}
-                className="shrink-0 text-sm text-foreground/60 underline underline-offset-4"
+                className="shrink-0 text-sm text-muted underline underline-offset-4"
               >
                 Cancel
               </button>
             </div>
-            <label className="flex flex-col gap-1 text-xs">
+            <label className="field-label">
               Business name
               <input
                 type="text"
@@ -222,10 +219,10 @@ export function AddSpot() {
                 value={selected.name}
                 onChange={(e) => patchSelected({ name: e.target.value })}
                 placeholder="e.g. Jane's home studio"
-                className={inputCls}
+                className="input"
               />
             </label>
-            <label className="flex flex-col gap-1 text-xs">
+            <label className="field-label">
               Address (optional)
               <input
                 type="text"
@@ -234,11 +231,11 @@ export function AddSpot() {
                   patchSelected({ formattedAddress: e.target.value || null })
                 }
                 placeholder="Street, city"
-                className={inputCls}
+                className="input"
               />
             </label>
             <div className="flex flex-wrap gap-2">
-              <label className="flex grow flex-col gap-1 text-xs">
+              <label className="field-label grow">
                 Phone (optional)
                 <input
                   type="tel"
@@ -247,10 +244,10 @@ export function AddSpot() {
                     patchSelected({ phone: e.target.value || null })
                   }
                   placeholder="(555) 123-4567"
-                  className={inputCls}
+                  className="input"
                 />
               </label>
-              <label className="flex grow flex-col gap-1 text-xs">
+              <label className="field-label grow">
                 Website (optional)
                 <input
                   type="url"
@@ -259,7 +256,7 @@ export function AddSpot() {
                     patchSelected({ websiteUrl: e.target.value || null })
                   }
                   placeholder="https://…"
-                  className={inputCls}
+                  className="input"
                 />
               </label>
             </div>
@@ -269,12 +266,12 @@ export function AddSpot() {
             <div>
               <div className="font-medium">{selected.name}</div>
               {selected.formattedAddress ? (
-                <div className="mt-0.5 text-sm text-foreground/60">
+                <div className="mt-0.5 text-sm text-muted">
                   {selected.formattedAddress}
                 </div>
               ) : null}
               {selected.phone ? (
-                <div className="mt-0.5 text-sm text-foreground/60">
+                <div className="mt-0.5 text-sm text-muted">
                   {selected.phone}
                 </div>
               ) : null}
@@ -282,7 +279,7 @@ export function AddSpot() {
             <button
               type="button"
               onClick={reset}
-              className="shrink-0 text-sm text-foreground/60 underline underline-offset-4"
+              className="shrink-0 text-sm text-muted underline underline-offset-4"
             >
               Change
             </button>
@@ -292,24 +289,26 @@ export function AddSpot() {
 
       {/* Services */}
       <div>
-        <h2 className="text-sm font-semibold">Services you get here</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          Services you get here 💅
+        </h2>
         <div className="mt-3 flex flex-col gap-3">
           {services.map((s, i) => (
             <div
               key={i}
-              className="flex flex-wrap items-end gap-2 rounded-lg border border-foreground/10 p-3"
+              className="card flex flex-wrap items-end gap-3 p-4"
             >
-              <label className="flex grow flex-col gap-1 text-xs">
+              <label className="field-label grow">
                 Service
                 <input
                   type="text"
                   value={s.name}
                   onChange={(e) => updateService(i, { name: e.target.value })}
                   placeholder="e.g. Pedicure"
-                  className={inputCls}
+                  className="input"
                 />
               </label>
-              <label className="flex w-16 flex-col gap-1 text-xs">
+              <label className="field-label w-20">
                 Every
                 <input
                   type="number"
@@ -318,10 +317,10 @@ export function AddSpot() {
                   onChange={(e) =>
                     updateService(i, { frequencyValue: e.target.value })
                   }
-                  className={inputCls}
+                  className="input"
                 />
               </label>
-              <label className="flex w-24 flex-col gap-1 text-xs">
+              <label className="field-label w-28">
                 Unit
                 <select
                   value={s.frequencyUnit}
@@ -330,20 +329,20 @@ export function AddSpot() {
                       frequencyUnit: e.target.value as ServiceRow["frequencyUnit"],
                     })
                   }
-                  className={inputCls}
+                  className="input"
                 >
                   <option value="day">days</option>
                   <option value="week">weeks</option>
                   <option value="month">months</option>
                 </select>
               </label>
-              <label className="flex w-36 flex-col gap-1 text-xs">
+              <label className="field-label w-40">
                 Last visit (optional)
                 <input
                   type="date"
                   value={s.anchorDate}
                   onChange={(e) => updateService(i, { anchorDate: e.target.value })}
-                  className={inputCls}
+                  className="input"
                 />
               </label>
               {services.length > 1 ? (
@@ -352,7 +351,7 @@ export function AddSpot() {
                   onClick={() =>
                     setServices((rows) => rows.filter((_, idx) => idx !== i))
                   }
-                  className="pb-2 text-sm text-foreground/50 underline underline-offset-4"
+                  className="pb-2 text-sm text-muted underline underline-offset-4"
                 >
                   Remove
                 </button>
@@ -363,7 +362,7 @@ export function AddSpot() {
         <button
           type="button"
           onClick={() => setServices((rows) => [...rows, { ...emptyService }])}
-          className="mt-2 text-sm font-medium text-foreground underline underline-offset-4"
+          className="mt-2 text-sm font-medium text-accent-strong underline underline-offset-4"
         >
           + Add another service
         </button>
@@ -371,7 +370,9 @@ export function AddSpot() {
 
       {/* Booking method */}
       <div>
-        <h2 className="text-sm font-semibold">How do you book?</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          How do you book?
+        </h2>
         <div className="mt-3 flex flex-col gap-2 text-sm">
           {(["phone", "website", "other"] as const).map((m) => (
             <label key={m} className="flex items-center gap-2">
@@ -394,22 +395,22 @@ export function AddSpot() {
               value={bookingUrl}
               onChange={(e) => setBookingUrl(e.target.value)}
               placeholder="https://…"
-              className={`${inputCls} mt-1`}
+              className="input mt-1"
             />
           ) : null}
         </div>
       </div>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={save}
           disabled={saving || !selected.name.trim()}
-          className="rounded-lg bg-foreground px-5 py-2.5 text-sm font-medium text-background disabled:opacity-50"
+          className="btn btn-primary"
         >
-          {saving ? "Saving…" : "Save spot"}
+          {saving ? "Saving…" : "💾 Save spot"}
         </button>
       </div>
     </div>
