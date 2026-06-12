@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/user";
 import { todayInTimeZone } from "@/lib/domain/scheduling";
 import { Brand } from "@/components/brand";
 
@@ -9,9 +10,7 @@ function freqLabel(value: number, unit: string) {
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null; // (app)/layout already guards this
 
   const { data: profile } = await supabase

@@ -27,6 +27,40 @@ export async function updateReminderOptIn(formData: FormData): Promise<void> {
   revalidatePath("/settings");
 }
 
+// Save the user's home city + coordinates. Future business searches bias their
+// autocomplete to a radius around this point. RLS scopes the update to the owner.
+export async function setHomeCity(input: {
+  label: string;
+  lat: number;
+  lng: number;
+}): Promise<{ error?: string }> {
+  const { supabase, user } = await currentUser();
+  const label = input.label.trim();
+  if (
+    !label ||
+    !Number.isFinite(input.lat) ||
+    !Number.isFinite(input.lng)
+  ) {
+    return { error: "Pick a city from the list." };
+  }
+  const { error } = await supabase
+    .from("profiles")
+    .update({ home_city: label, home_lat: input.lat, home_lng: input.lng })
+    .eq("id", user.id);
+  if (error) return { error: "Could not save your city. Try again." };
+  revalidatePath("/settings");
+  return {};
+}
+
+export async function clearHomeCity(): Promise<void> {
+  const { supabase, user } = await currentUser();
+  await supabase
+    .from("profiles")
+    .update({ home_city: null, home_lat: null, home_lng: null })
+    .eq("id", user.id);
+  revalidatePath("/settings");
+}
+
 // T9.2 — permanently delete the account. Removing the auth user cascades to the
 // profile and every owned row (spots → services → appointments → reminders, all
 // FK on delete cascade), so no manual cleanup is needed. Requires the admin

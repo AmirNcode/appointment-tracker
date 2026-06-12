@@ -93,6 +93,9 @@ export type Database = {
           email: string | null
           email_reminders_opt_in: boolean
           full_name: string | null
+          home_city: string | null
+          home_lat: number | null
+          home_lng: number | null
           id: string
           marketing_opt_in: boolean
           timezone: string
@@ -103,6 +106,9 @@ export type Database = {
           email?: string | null
           email_reminders_opt_in?: boolean
           full_name?: string | null
+          home_city?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
           id: string
           marketing_opt_in?: boolean
           timezone?: string
@@ -113,6 +119,9 @@ export type Database = {
           email?: string | null
           email_reminders_opt_in?: boolean
           full_name?: string | null
+          home_city?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
           id?: string
           marketing_opt_in?: boolean
           timezone?: string

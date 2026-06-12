@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/user";
 import { confirmAppointment, updateAppointmentCost } from "@/actions/appointments";
 import { AppointmentActions } from "@/components/appointments/appointment-actions";
 
@@ -38,9 +39,7 @@ export default async function AppointmentPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null; // (app)/layout already guards this
 
   const { data: profile } = await supabase

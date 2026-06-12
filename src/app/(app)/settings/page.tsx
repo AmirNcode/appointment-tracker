@@ -1,18 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/user";
 import { updateReminderOptIn } from "@/actions/account";
 import { signOut } from "@/actions/auth";
 import { DeleteAccountButton } from "@/components/account/delete-account-button";
+import { HomeCity } from "@/components/account/home-city";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null; // (app)/layout guards this
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("email_reminders_opt_in, timezone")
+    .select("email_reminders_opt_in, timezone, home_city")
     .eq("id", user.id)
     .single();
   const optedIn = profile?.email_reminders_opt_in ?? false;
@@ -23,6 +23,18 @@ export default async function SettingsPage() {
       <p className="mt-2 text-sm text-muted">
         Signed in as <span className="font-medium text-foreground">{user.email}</span>
       </p>
+
+      {/* Home city */}
+      <section className="mt-8">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          Home city 🏙️
+        </h2>
+        <p className="mt-1 mb-3 text-sm text-muted">
+          Set where you mostly book. New place searches will favour spots in
+          your city and the surrounding area.
+        </p>
+        <HomeCity currentCity={profile?.home_city ?? null} />
+      </section>
 
       {/* Email reminders */}
       <section className="mt-8">

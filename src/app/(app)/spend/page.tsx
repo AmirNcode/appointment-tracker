@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/user";
 import { todayInTimeZone } from "@/lib/domain/scheduling";
 
 function monthLabel(month: string): string {
@@ -73,9 +74,7 @@ export default async function SpendPage({
 }) {
   const { month } = await searchParams;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null; // (app)/layout guards this
 
   const { data: profile } = await supabase

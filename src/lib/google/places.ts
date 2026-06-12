@@ -27,17 +27,44 @@ function apiKey(): string {
   return key;
 }
 
+export type AutocompleteOptions = {
+  // Soft-bias results toward a circle (center + radius in metres). Results may
+  // still include strong matches outside it — which is what lets a spot in a
+  // neighbouring municipality (e.g. Richmond Hill vs Toronto) still surface.
+  bias?: { lat: number; lng: number; radiusMeters: number };
+  // Restrict suggestions to these primary types (e.g. ["locality"] for cities).
+  includedPrimaryTypes?: string[];
+};
+
 export async function placesAutocomplete(
   input: string,
   sessionToken: string,
+  opts: AutocompleteOptions = {},
 ): Promise<PlaceSuggestion[]> {
+  const body: Record<string, unknown> = {
+    input,
+    sessionToken,
+    regionCode: "CA",
+  };
+  if (opts.bias) {
+    body.locationBias = {
+      circle: {
+        center: { latitude: opts.bias.lat, longitude: opts.bias.lng },
+        radius: opts.bias.radiusMeters,
+      },
+    };
+  }
+  if (opts.includedPrimaryTypes?.length) {
+    body.includedPrimaryTypes = opts.includedPrimaryTypes;
+  }
+
   const res = await fetch(`${PLACES_BASE}/places:autocomplete`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey(),
     },
-    body: JSON.stringify({ input, sessionToken, regionCode: "CA" }),
+    body: JSON.stringify(body),
     cache: "no-store",
   });
 
